@@ -1,0 +1,62 @@
+$( document ).ready(function() {
+   mapaStart();
+   updateShowEvent();
+   
+   $(".more-event").click(function(){
+		showOtherEvent += 2;
+		updateShowEvent();	   
+   });
+})
+
+var showOtherEvent = 2;
+
+var mapa;
+var ikona;
+var dymek = new google.maps.InfoWindow();
+function dodajMarker(latlng)
+{
+	var marker = new google.maps.Marker({  
+				position: latlng,
+					map: mapa,
+					icon: ikona,
+				});
+	var tytul = $('#event_info').data('title');
+	var miejsce = $('#event_info').data('place');;
+	dymek.setContent("<swap style='font-size:20px'>" + tytul + "<br></swap>" + miejsce);
+	dymek.open(mapa,marker);
+}
+	
+function mapaStart()  
+{ 
+	var x = $('#x').data('x');
+	var y = $('#y').data('y');
+	x = Number(x);
+	y = Number(y);
+	var wspolrzedne = new google.maps.LatLng(x,y);
+	var opcjeMapy = {
+		zoom: 15,
+		center: wspolrzedne,
+		mapTypeId: google.maps.MapTypeId.ROADMAP,
+		disableDefaultUI: true,
+	};
+	mapa = new google.maps.Map(document.getElementById("event_on_map"), opcjeMapy); 
+
+	var rozmiar = new google.maps.Size(37,49);
+	var punkt_startowy = new google.maps.Point(0,0);
+	var punkt_zaczepienia = new google.maps.Point(18,49);
+	
+	// ikonki
+	ikona = new google.maps.MarkerImage("img/m_df.png", rozmiar, punkt_startowy, punkt_zaczepienia);
+	
+	
+	dodajMarker(wspolrzedne);
+}  
+
+function updateShowEvent(){
+	$('.other-event-in-place .event').show();
+	$.each($('.other-event-in-place .event'), function(index, value) { 
+		if($(this).index() > showOtherEvent){
+			$(this).hide();
+		}
+	});
+}

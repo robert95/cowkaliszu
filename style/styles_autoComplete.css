@@ -1,0 +1,24 @@
+#results {
+	display: none;
+	width: 304px;
+	border: 1px solid #c0c0c0;
+	position: absolute;
+	z-index: 2;
+	background: #21211f;
+	left: 35px;
+}
+
+#results .item {
+	padding: 5px;
+	border-bottom: 1px solid #c0c0c0;
+}
+
+#results .item:last-child {
+	border-bottom: 0px;
+}
+
+#results .item:hover {
+	background-color: white;
+	color: #edac00;
+	cursor: pointer;
+}

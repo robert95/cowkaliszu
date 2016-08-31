@@ -1,0 +1,39 @@
+@import url(https://fonts.googleapis.com/css?family=Ubuntu);
+.ui-widget-header{
+	background: #edac00 !important;
+	color: white !important;
+}
+.ui-state-default{
+	color: #edac00 !important;
+	font-family: 'Ubuntu', sans-serif !important;
+	background: none !important;
+	border: none !important;
+	width: 20px !important;
+}
+.ui-state-default:hover{
+	color: black !important;
+	background: #edac00 !important;
+}
+.ui-datepicker th {
+	font-size: 10px;	
+}
+.ui-datepicker{
+	width: 250px !important;
+	float: right !important; 
+	background: #efefef !important;
+}
+input[id="date"]{
+	  margin: 20px 0;
+	  width: 250px;
+}
+.ui-datepicker-current-day{
+	background-color: black;
+	color: white;
+}
+#edit_event_time #datepicker{
+	float: none !important;
+	width: 100% !important;
+	border-right: 0 !important;
+	padding: 0 !important;
+	min-height: 0 !important;
+}
