@@ -40,6 +40,52 @@
 		return $wyj;
 	}
 	
+	function categoriesAsListToFilter($filterCats){
+		$conn = sqlConnect();
+		
+		$countCatsInFilter = count($filterCats);
+		$filterIsNotUsed = ($countCatsInFilter == 0);
+		$query="SELECT * FROM `kategorie`";
+		$result=$conn->query($query);
+		$countOfAllCats = $result->num_rows;
+		$wyj = '<ul class="cat-list ';
+		if($countCatsInFilter == 0) $wyj .= "active-all-options";
+		$wyj .= '">';
+		while($row = $result->fetch_assoc()) {
+			$slu = getSluForCat($row["nazwa"]);
+			$class = "";
+			if(in_array($slu, $filterCats) || $filterIsNotUsed){
+				$class = "activ-option";
+			}
+			$wyj .= '<li data-id="'.$row["id"].'" data-slu="'.$slu.'" class="'.$class.'">'.$row["nazwa"].'</li>';				
+		}
+		$wyj .= '</ul>';
+		sqlClose($conn);
+		return $wyj;
+	}
+	
+	function pricesAsListToFilter($filterPrice){
+		$countPricesInFilter = count($filterPrice);
+		$filterIsNotUsed = ($countPricesInFilter == 0);
+		$wyj = '<ul class="price-list ';
+		if($countPricesInFilter == 0) $wyj .= "active-all-options";
+		$wyj .= '">';
+		
+		$class = (in_array("platne", $filterPrice) || $filterIsNotUsed) ? "activ-option" : "";
+		$wyj .= '<li data-id="0" data-slu="platne" class="'.$class.'">płatne</li>';
+		$class = (in_array("bezplatne", $filterPrice) || $filterIsNotUsed) ? "activ-option" : "";
+		$wyj .= '<li data-id="1" data-slu="bezplatne" class="'.$class.'">wstęp wolny</li>';
+		
+		$wyj .= '</ul>';
+		return $wyj;
+	}
+	
+	function getSluForCat($name){
+		$name = notPolishLink($name);
+		$name = str_replace(' ', '', strtolower($name));
+		return preg_replace('/[^A-Za-z0-9\-]/', '', $name);
+	}
+	
 	function categoriesAsSelectWithSelected($conn, $id){
 		$query="SELECT * FROM `kategorie`";
 		$result=$conn->query($query);
@@ -433,7 +479,7 @@
 				$time = $row['czas'];
 				$readyTime = substr($row['czas'], 0, 5);
 				
-				$wyj.= "<tr><td>".$readyData."</td><td>|</td><td>".$readyTime.'</td><td>|</td><td><img src="img/add_to_fav.png" alt="Dodaj do ulubionych" data-id="'.$row['id'].'" onClick="add_to_like('.$row['id'].', this);" class="liked_icon" style="cursor:pointer;"/></td></tr>';
+				$wyj.= "<tr><td>".$readyData."</td><td>|</td><td class='other_date_time'>".$readyTime.'</td><td><img src="img/add_to_fav.png" alt="Dodaj do ulubionych" data-id="'.$row['id'].'" onClick="add_to_like('.$row['id'].', this);" class="liked_icon" style="cursor:pointer;"/></td></tr>';
 			}
 			$wyj .= "</table>";
 		}			
@@ -461,7 +507,14 @@
 			$countLiked = countOfLiked($row["id"], $conn);
 			$link = linkToEvent($row["id"]);
 			$fblink = "https://co.wkaliszu.pl/".$link;
-			$wyj .= '<div id="main_event" data-id="'.$row['id'].'">
+			$comments = "0";
+			
+			if($row['cena'] != ""){
+				if($row['cena'] == "0") $price = "wstęp wolny";
+				else $price = "Od ".$row['cena']." zł";
+			}else $price = "";	
+			
+			$wyj .= '<div id="main_event" class="main-event-in-main-page" data-id="'.$row['id'].'">
 				<div class="mainevent_img" onclick="location.href=\''.linkToEvent($row["id"]).'\'"><img src="'.$row["obraz"].'" alt="'.$row["nazwa"].'" id="main_picture" style="top: '.$row['glowne'].'px;"/></div>
 					<div class="mainevent_desc" onclick="location.href=\''.linkToEvent($row["id"]).'\'">
 						<div class="mainevent-title-box">
@@ -470,12 +523,14 @@
 						</div>
 						<div class="mainevent-info-box">
 							<h2><a href="'.linkToEvent($row["id"]).'">'.$row["nazwa"].'</a></h2>
-							<p>'.$place['nazwa'].'</p>
+							<p class="place-info">'.$place['nazwa'].'</p>
+							<p class="price-info">'.$price.'</p>
 						</div>
 					</div>
 						<table>
 							<tr>
 								<td><img src="img/views.png" alt="Widziało: "/>'.$row["widzow"].'</td>
+								<td><img src="img/comments.png" alt="Widziało: "/>'.$comments.'</td>
 								<td style="padding-right: 10px;"><img src="img/favourite.png" alt="Ulubione: "/>'.$countLiked.'</td>
 								<!--<td style="border-left: 1px solid;"><img src="img/add_to_fav.png" alt="Dodaj do ulubionych" onClick="add_to_like('.$row["id"].', this);" data-id="'.$row["id"].'" class="liked_icon"/> <div class="fb-share-button" data-href="'.$fblink.'" data-layout="icon"></div></td>-->
 							</tr>
@@ -504,6 +559,12 @@
 			$i++;
 		}
 		return $wyj;
+	}
+	
+	function isLastDayWithEvents($conn, $data){
+		$query="SELECT * FROM `wydarzenia` WHERE `data` >= '".$data."' AND `poczekalnia` = 0 ORDER BY `czas`";
+		$result=$conn->query($query);
+		return ($result->num_rows == 0);
 	}
 	
 	function getEventForOneDay($conn)
@@ -999,14 +1060,26 @@
 			$kat = getCategory($conn, $e["id_kat"]);
 			$place = getPlace($conn, $e["id_miejsce"]);
             $link = linkToEvent($e["id"]);
+			
+			if($e['cena'] != ""){
+				if($e['cena'] == "0") $price = "wstęp wolny";
+				else $price = "Od ".$e['cena']." zł";
+			}else $price = "";	
+			
+			$temp_date = strtotime( $e['data'] );
+			$dayInWeek = date( 'N', $temp_date );
+			$weekDay = getFullPolishDayName($dayInWeek);
+			$polishDate = convertToCoolDate($e['data']);
+	
 			$liked_icon = isLiked($e["id"], $conn) == 0?'img/add_to_fav.png':'img/del_to_fav.png';
-			$wyj .= '<div class="event" id="e_'.$i.'" data-id="'.$e['id'].'">
+			$wyj .= '<div class="event" data-id="'.$e['id'].'">
 						<div class="ev_th thumb_event" onclick="location.href=\''.$link.'\'"><img src="'.$e['miniatura'].'" alt="'.$e['nazwa'].'" onload="fitThumbSize();"/></div>
-						<div class="event_desc" onclick="location.href=\''.$link.'\'">
+						<div class="event_desc">
 							<div class="event-day-cat"><img src="'.$kat["obrazek"].'" alt="'.$kat["nazwa"].'"/><span> '.$kat["nazwa"].'</span></div>
 							<h4><a href="'.$link.'">'.$e['nazwa'].'</a></h4>
 							<h5>'.$place['nazwa'].'</h5>
-							<h6>g. '.substr($e['czas'], 0, 5).'</h6>
+							<h6>g. '.substr($e['czas'], 0, 5).' <span class="price_separator"> | </span> '.$price.'</h6>
+							<p class="more-event-data">'.$weekDay.', '.$polishDate.'</p>
 						</div>
 					</div>';
 			$i++;				
@@ -1014,6 +1087,129 @@
 		
 		sqlClose($conn);
 		return $wyj;
+	}
+	
+	function getEventInSameCategory($id_kat, $id_event){
+		$conn = sqlConnect();
+		$wyj = "";
+		
+		$query="SELECT * FROM `wydarzenia` WHERE `id_kat` = $id_kat AND CURRENT_DATE <= `data_end` AND `id` <> $id_event ORDER BY `data` ASC, `czas` ASC";
+		
+		$result=$conn->query($query);
+		$wyj="";
+		$i = 1;
+		while($e = $result->fetch_assoc()) {
+			$kat = getCategory($conn, $e["id_kat"]);
+			$place = getPlace($conn, $e["id_miejsce"]);
+            $link = linkToEvent($e["id"]);
+			
+			if($e['cena'] != ""){
+				if($e['cena'] == "0") $price = "wstęp wolny";
+				else $price = "Od ".$e['cena']." zł";
+			}else $price = "";	
+			
+			$temp_date = strtotime( $e['data'] );
+			$dayInWeek = date( 'N', $temp_date );
+			$weekDay = getFullPolishDayName($dayInWeek);
+			$polishDate = convertToCoolDate($e['data']);
+	
+			$liked_icon = isLiked($e["id"], $conn) == 0?'img/add_to_fav.png':'img/del_to_fav.png';
+			$wyj .= '<div class="event event-in-same-cat" data-id="'.$e['id'].'">
+						<div class="ev_th thumb_event" onclick="location.href=\''.$link.'\'"><img src="'.$e['miniatura'].'" alt="'.$e['nazwa'].'" onload="fitThumbSize();"/></div>
+						<div class="event_desc">
+							<div class="event-day-cat"><img src="'.$kat["obrazek"].'" alt="'.$kat["nazwa"].'"/><span> '.$kat["nazwa"].'</span></div>
+							<h4><a href="'.$link.'">'.$e['nazwa'].'</a></h4>
+							<h5>'.$place['nazwa'].'</h5>
+							<h6>g. '.substr($e['czas'], 0, 5).' <span class="price_separator"> | </span> '.$price.'</h6>
+							<p class="more-event-data">'.$weekDay.', '.$polishDate.'</p>
+						</div>
+					</div>';
+			$i++;				
+		}
+		
+		sqlClose($conn);
+		return $wyj;
+	}
+	
+	function getNearRestuarant($id_place){
+		$conn = sqlConnect();
+		$wyj = "";
+		
+		$query="SELECT * FROM `miejsce` WHERE `id` = $id_place";
+		$result=$conn->query($query);
+		while($e = $result->fetch_assoc()) {
+            $x1 = $e["x"];				
+            $y1 = $e["y"];				
+		}
+		
+		$distArr = array();
+		$idArr = array();
+		$query="SELECT * FROM `miejsce` WHERE `id` <> $id_place";
+		$result=$conn->query($query);
+		while($e = $result->fetch_assoc()) {
+			array_push($idArr, $e["id"]);
+			array_push($distArr, getDistanceFromLatLonInKm($x1,$y1,$e["x"],$e["y"]));
+		}
+		
+		for($i = 0; $i < 3; $i++){
+			$maxs = array_keys($distArr, min($distArr));
+			$idP = $idArr[$maxs[0]];
+			unset($distArr[$maxs[0]]);
+			unset($idArr[$maxs[0]]);
+			
+			$query="SELECT * FROM `miejsce` WHERE `id` = $idP";
+			$result=$conn->query($query);
+			while($e = $result->fetch_assoc()) {
+				$link = "";//linkToPlace($e["id"]);
+				$thumb = "img/place_thumb.png";//$e['miniatura'];
+				
+				$avgRating = "4,7";
+				$foodRating = getStartsForRating(5);
+				$serviceRating = getStartsForRating(2);
+				$priceRating = getStartsForRating(4);
+				$wyj .= '<div class="near-place event" data-id="'.$e['id'].'">
+							<div class="ev_th thumb_event" onclick="location.href=\''.$link.'\'"><img src="'.$thumb.'" alt="'.$e['nazwa'].'"/></div>
+							<div class="event_desc">
+								<h4><a href="'.$link.'">'.$e['nazwa'].'</a></h4>
+								<h5>'.$e['adres'].'</h5>
+								<div class="place-rating">
+									Średnia ocen: <strong>'.$avgRating.'</strong><br>
+									Jedzenie: '.$foodRating.'<br>
+									Obsługa: '.$serviceRating.'<br>
+									Ceny: '.$priceRating.'
+								</div>
+							</div>
+						</div>';			
+			}
+		}		
+			
+		sqlClose($conn);
+		return $wyj;
+	}
+	
+	function getStartsForRating($rating){
+		$stars = "";
+		for($i = 0; $i < $rating; $i++){
+			$stars .= '<img src="img/active_star.png" class="rating-star" alt="ocena">';
+		}
+		for($i = 0; $i < (5-$rating); $i++){
+			$stars .= '<img src="img/star.png" class="rating-star" alt="ocena">';
+		}
+		return $stars;
+	}
+	
+	function getDistanceFromLatLonInKm($lat1,$lon1,$lat2,$lon2) {
+		$R = 6371; // Radius of the earth in km
+		$dLat = deg2rad($lat2-$lat1);  // deg2rad below
+		$dLon = deg2rad($lon2-$lon1); 
+		$a = 
+		sin($dLat/2) * sin($dLat/2) +
+		cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * 
+		sin($dLon/2) * sin($dLon/2)
+		; 
+		$c = 2 * asin(min(1, sqrt($a))); 
+		$d = $R * $c; // Distance in km
+		return $d;
 	}
 	
 	function cleanEventSession(){
@@ -1317,4 +1513,101 @@
 			sqlClose($conn);
 		}
 	}
+	
+	/**KOMENTARZE**/
+	function deleteComment($id){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `comments` WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function editComment($id, $content){
+		$conn = sqlConnect();
+		$sql = "UPDATE `comments` SET `content`='$content' WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function addComment($type, $id_user, $id_item, $content){			
+		$conn = sqlConnect();			
+		$sql = "INSERT INTO `comments` (`type`, `id_user`, `id_item`, `content`) VALUES ($type , $id_user , $id_item , '$content')"; 
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function getCommentForEvent($id){
+		$conn = sqlConnect();
+		if(isset($_COOKIE['stmh'])){
+			$mh = $_COOKIE['stmh'];
+			$loggedUser = getUser($mh, $conn);
+			if( getPermission($mh, $conn) == 1 || getPermission($mh, $conn) == 2){
+				$admin = true;
+			}else{
+				$admin = false;
+			}
+		}else{
+			$admin = false;
+		}
+		
+		if($loggedUser['id']) $loggedUserID = $loggedUser['id'];
+		else $loggedUserID = -2;
+		
+		$query="SELECT * FROM `comments` WHERE `id_item` = $id AND `type` = 1 ORDER BY `id` DESC";
+		$result=$conn->query($query);
+		$wyj="";
+		while($c = $result->fetch_assoc()) {
+			if($c['id_user'] == -1){
+				$user = [ "avatar" => "img/bigavatar.png", "login" => "Anonim" ];
+				$owner = false;
+			}else{
+				$user = getUserByID($c['id_user'], $conn);
+				$owner = ($user['id'] == $loggedUserID);
+			}
+			$wyj .= '<div class="ev-comment">
+							<div class="avatar-comment">
+								<img src="img/bigavatar.png" alt="'.$user['login'].'">
+							</div>
+							<div class="comment-content">';
+			if($owner || $admin){
+				$wyj .= '<div class="option-btns">';
+				if($admin)	$wyj .= '<button class="edit-btn" onclick="editComment(this);">edytuj</button>';
+					$wyj .= '<button class="delete-btn" onclick="deleteComment('.$c['id'].');">usuń</button>
+				</div>';
+			}
+					$wyj .= '<h5>'.$user['login'].'</h5>
+					<p>'.$c['content'].'</p>';
+					
+			if($admin) $wyj .= '<div class="editComment-panel"><form class="editComment">
+									<textarea class="edit-comment-field" name="content" placeholder="Napisz komentarz...">'.$c['content'].'</textarea>
+									<input type="hidden" name="id" value="'.$c['id'].'">
+								</form>
+								<button class="accept-btn" onclick="acceptEditComment(this);">zapisz</button></div>';
+				$wyj .= '</div>
+			</div>';
+		}
+		return $wyj;
+		sqlClose($conn);
+	}
+	
+	function getComment($id){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `comments` WHERE `id` = $id";
+		$result=$conn->query($query);
+		while($c = $result->fetch_assoc()) {
+			sqlClose($conn);
+			return $c;
+		}
+	}
+	
+	function isCommentOwner($id){
+		$conn = sqlConnect();
+		$comment = getComment($id);
+		$mh = $_COOKIE['stmh'];
+		$user = getUser($mh, $conn);
+		$result = $comment['id_user'] == $user['id'];
+		sqlClose($conn);
+		return $result;
+	}
+	/**END KOMENTARZE**/
 ?>

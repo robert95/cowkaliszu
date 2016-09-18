@@ -1,14 +1,22 @@
 $( document ).ready(function() {
    mapaStart();
    updateShowEvent();
+   updateShowEventinCat();
+   checkOtherEventsShouldShown();
    
    $(".more-event").click(function(){
-		showOtherEvent += 2;
+		showOtherEvent += 3;
 		updateShowEvent();	   
+   });
+   
+   $(".more-event-incat").click(function(){
+		showOtherEventinCat += 3;
+		updateShowEventinCat();	   
    });
 })
 
-var showOtherEvent = 2;
+var showOtherEvent = 3;
+var showOtherEventinCat = 3;
 
 var mapa;
 var ikona;
@@ -53,10 +61,34 @@ function mapaStart()
 }  
 
 function updateShowEvent(){
-	$('.other-event-in-place .event').show();
-	$.each($('.other-event-in-place .event'), function(index, value) { 
+	$('.other-ev-in-place .event').show();
+	$.each($('.other-ev-in-place .event'), function(index, value) { 
 		if($(this).index() > showOtherEvent){
 			$(this).hide();
 		}
 	});
+	if(showOtherEvent == $('.other-ev-in-place .event').length){
+		$(".more-event").hide();
+	}
+}
+
+function updateShowEventinCat(){
+	$('.other-ev-in-cat .event-in-same-cat').show();
+	$.each($('.other-ev-in-cat .event-in-same-cat'), function(index, value) { 
+		if($(this).index() > showOtherEventinCat){
+			$(this).hide();
+		}
+	});
+	if(showOtherEventinCat == $('.other-ev-in-cat .event-in-same-cat').length){
+		$(".more-event-incat").hide();
+	}
+}
+
+function checkOtherEventsShouldShown(){
+	if($('.other-ev-in-cat .event-in-same-cat').length == 0){
+		$(".other-ev-in-cat").hide();
+	}
+	if($('.other-ev-in-place .event').length == 0){
+		$(".other-ev-in-place").hide();
+	}
 }

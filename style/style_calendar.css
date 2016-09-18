@@ -2,25 +2,30 @@
 .ui-widget-header{
 	background: #edac00 !important;
 	color: white !important;
+	font-size: 10px !important;
 }
 .ui-state-default{
 	color: #edac00 !important;
 	font-family: 'Ubuntu', sans-serif !important;
 	background: none !important;
 	border: none !important;
-	width: 20px !important;
+	/*width: 20px !important;*/
+	text-align: center !important;
 }
 .ui-state-default:hover{
 	color: black !important;
 	background: #edac00 !important;
 }
 .ui-datepicker th {
-	font-size: 10px;	
+	font-size: 9px;	
 }
 .ui-datepicker{
-	width: 250px !important;
-	float: right !important; 
+	width: 147px !important;
+	/*float: right !important; */
 	background: #efefef !important;
+}
+.ui-widget {
+    font-size: 0.71em !important;
 }
 input[id="date"]{
 	  margin: 20px 0;

@@ -3,10 +3,14 @@ var markers = new Array();
 var mapa;
 var ikona;
 var dymek = new google.maps.InfoWindow();
+var filterData = new Date();
+var lastData;
 $( document ).ready(function() {
-	data = wczoraj(data);
+	filterData = $("#filterData").val()!="" ? $("#filterData").val() : new Date();
+	$("#datepicker").datepicker('setDate', filterData);
+	/*data = wczoraj(data);
 	odswiezSwitcher(true);
-	$("#datepicker").hide();
+	$("#datepicker").hide();*/
 	mapaStart();
 	
 	var s = $("#stick_map");
@@ -15,46 +19,81 @@ $( document ).ready(function() {
 	
     $(window).scroll(function() {
 		var windowpos = $(window).scrollTop();
+		var widthParent = s.width();
         if (windowpos >= off.top ) {
             s.addClass("stick");
+			$("#empty_stick_map").show();
 			s.css("left", off.left);
+			s.css("width", widthParent);
         } else {
             s.removeClass("stick"); 
+			$("#empty_stick_map").hide();
+			s.css("left", 0);
+			s.attr('style', function(i, style){return style.replace(/width[^;]+;?/g,'');
+			});
         }
+		
+		if($(window).scrollTop() == $(document).height() - $(window).height()) {
+			loadMoreEvents();
+		}
     });
+	
+	$('.fb-share-event').click(function() {
+		var link = $(this).data('href');
+		FB.ui({
+			display: 'popup',
+			method: 'share',
+			href: link,
+		}, function(response) {});
+	});
 });
 
+Date.prototype.sameDay = function(d) {
+  return this.getFullYear() === d.getFullYear()
+    && this.getDate() === d.getDate()
+    && this.getMonth() === d.getMonth();
+}
 $(function() {
 	$( "#datepicker" ).datepicker({
 		dateFormat: 'yy-mm-dd',
 		dayNamesMin: [ "Nie", "Pon", "Wt", "Śr", "Cz", "Pt", "So" ],
 		monthNames: [ "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień" ],
+		beforeShowDay: function(d) {
+			var today = new Date(); 
+			if(today < d || d.sameDay(today)){
+				return [true,"",""]; 
+			}else{
+				return [true,"beforeToday",""]; 
+			}
+		},
+		defaultDate: filterData
 	});
+	odwiedzWydarzenia();
 });
 $("#datepicker").on("change",function(){
-	var selected = $(this).val();
+	//location.reload(); 
+	/*var selected = $(this).val();
 	data = new Date(selected);
 	data = wczoraj(data);
-	odswiezSwitcher(true);
-	$(this).hide();
+	odswiezSwitcher(true);*/
+	setLink();
+	odwiedzWydarzenia();
+	/*$(this).hide();*/
 	//alert(jutro(data).toISOString().slice(0,10).replace(/-/g,"-"));
 	//alert(wczoraj(data).toISOString().slice(0,10).replace(/-/g,"-"));		
 });
 
-function jutro(dzis)
-{
+function jutro(dzis){
 	var jutro = new Date(dzis.valueOf() + 86400000); //nastepny dzien
 	return jutro;
 }
 
-function wczoraj(dzis)
-{
+function wczoraj(dzis){
 	var jutro = new Date(dzis.valueOf() - 86400000); //poprzedni dzien
 	return jutro;
 }
 
-function odswiezSwitcher(bool)
-{
+function odswiezSwitcher(bool){
 	if(bool) data = jutro(data);
 	else data = wczoraj(data);
 	
@@ -79,13 +118,12 @@ function odswiezSwitcher(bool)
 	var wyj2 = polskaNazwaMiesiaca(data.getMonth()) + ' ' + data.getFullYear();
 	$("#switcher_date").html(wyj);
 	$("#mmYY").text(wyj2);	
-	odwiedzWydarzenia();
+	/*odwiedzWydarzenia();
 	odwiezMape();
-	$("#datepicker").hide();
+	$("#datepicker").hide();*/
 }
 
-function zmienDate(x)
-{
+function zmienDate(x){
 	if(x<0)
 	{
 		x = Math.abs(x);
@@ -101,31 +139,92 @@ function zmienDate(x)
 	odswiezSwitcher(true);
 }
 
-function polskaNazwaMiesiaca(a)
-{
+function polskaNazwaMiesiaca(a){
 	names = ['styczeń','luty','marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień'];
 	return names[a];
 }
 
-function pokaz()
-{
-	$("#datepicker").show();
-	odwiedzWydarzenia();
+function pokaz(){
+	/*$("#datepicker").show();
+	odwiedzWydarzenia();*/
 }
 
-function odwiedzWydarzenia()
-{
-	var dzien = (data.getDate() < 10) ? "0" + (data.getDate()) : (data.getDate());
-	var miesiac = (data.getMonth()+1 < 10) ? "0" + (data.getMonth()+1) : (data.getMonth()+1);
-	var validFormatData = data.getFullYear() + "-" + miesiac + "-" +  dzien;
-	var adresurl = "EventByDate.php?data=" + validFormatData;
-	$.ajax({url: adresurl, success: function(result){
-            $("#events").html(result);
-			naStrone(1);
-    }});
+function getFormattedDate(d){
+	var dzien = (d.getDate() < 10) ? "0" + (d.getDate()) : (d.getDate());
+	var miesiac = (d.getMonth()+1 < 10) ? "0" + (d.getMonth()+1) : (d.getMonth()+1);
+	var validFormatData = d.getFullYear() + "-" + miesiac + "-" +  dzien;
+	return validFormatData;
 }
 
-function naStrone(x){
+var blockLoadNewEvents = false;
+var newDayisLoaded = false;
+var allDayisLoaded = false;
+var lastDataWithEvent = false;
+function odwiedzWydarzenia(d, a){
+	if(lastDataWithEvent != d) allDayisLoaded = false;
+	if(!blockLoadNewEvents){
+		if(!allDayisLoaded) $(".loading-panel").show();
+		newDayisLoaded = false;
+		if(!d) d = $("#datepicker").val();
+		if(!a) a = false;
+		var adresurl = "EventByDate.php?data=" + d;
+		$.ajax({url: adresurl, success: function(result){
+			blockLoadNewEvents = false;
+			if(result == ""){
+				odwiedzWydarzenia(getFormattedDate(jutro(new Date(d))), a);
+				return;
+			}else if(result != "false"){
+				lastData = d;
+				if(a) $(".event-list").append(result);
+				else $(".event-list").html(result);
+				newDayisLoaded = true;
+			}else if(result == "false"){
+				if(!a) $(".event-list").html("");
+				allDayisLoaded = true;
+				lastDataWithEvent = d;
+			}
+			if(newDayisLoaded){
+				runFilter();
+				checkAreVisableEvents();
+				checkAreVisableEventsInDay();
+				checkLastAddedVisibleEvents();
+				odwiezMape();
+			}
+			$(".loading-panel").hide();
+		}});
+	}
+}
+
+function loadMoreEvents(){
+	odwiedzWydarzenia(getFormattedDate(jutro(new Date(lastData))), true);
+	blockLoadNewEvents = true;
+}
+
+function checkLastAddedVisibleEvents(){
+	if($('.day-in-calendar').last().children().children(".event:visible").length == 0) loadMoreEvents();
+}
+
+function checkAreVisableEvents(){
+	if($(".event:visible").length == 0) $(".no-events").show();
+	else $(".no-events").hide();
+}
+
+function checkAreVisableEventsInDay(){
+	$('.day-in-calendar').each(function(){
+		$(this).show();
+		if($(this).children().children(".event:visible").length == 0) $(this).hide();
+	});
+	checkAreVisableEvents();
+}
+
+function removeDuplicates(){
+	$('.day-in-calendar').each(function(){
+		$(this).show();
+		if($(this).children().children(".event:visible").length == 0) $(this).hide();
+	});
+}
+
+/*function naStrone(x){
 	var tab = new Array();
 	$.each($('.cat_ch'), function(index, value) { 
 		if($(this).attr('data-check') == '1'){
@@ -143,7 +242,7 @@ function naStrone(x){
 		$(tab[i]).show();
 	}
 	odwiezMape();
-}
+}*/
 
 function dodajMarker(latlng, id, tytul, miejsce, data, czas, data_end, czas_end)
 {

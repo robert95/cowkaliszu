@@ -5,7 +5,7 @@
 	if(isset($_GET['cowkaliszu'])) $cowkalisz = "?cowkaliszu=1";
 	else $cowkalisz = "";
 ?>
-<div id="widget_co_w_kaliszu">
+<div id="widget_co_w_kaliszu" style="height: 100%;">
 	<style>
 		#widget_co_w_kaliszu{
 			position: fixed;
@@ -15,7 +15,7 @@
 			height: 1200px;
 			transition: right 0.5s ease-out 0s;
 			right: -259px;
-                        z-index: 1300;
+			z-index: 1300;
 		}
 		#widget_co_w_kaliszu:hover {
 				right: 0;
@@ -36,5 +36,6 @@
 			}
 		}
 	</style>
-	<iframe src="https://co.wkaliszu.pl/ulubionenowe.php<?php echo $cowkalisz; ?>" id="cowkaliszu_widget" scrolling="no" seamless="seamless"></iframe>
+	<!--<iframe src="https://co.wkaliszu.pl/ulubionenowe.php<?php echo $cowkalisz; ?>" id="cowkaliszu_widget" scrolling="no" seamless="seamless"></iframe>-->
+	<iframe src="ulubionenowe.php<?php echo $cowkalisz; ?>" id="cowkaliszu_widget" scrolling="no" seamless="seamless"></iframe>
 </div>

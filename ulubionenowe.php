@@ -126,7 +126,7 @@ session_start();
 		header("LOCATION: beck_set_liked.php");
 	}
 ?>
-<html>
+<html style="height: 100%;">
 	<head>
 		<base target="_parent" />
 		<meta charset="UTF-8">
@@ -226,7 +226,7 @@ session_start();
 				  });		  
 			</script>
 	</head>
-<body>
+<body style="height: 100%;">
 <section id="ulubione">
 	<?php 
 	if(!$zalogowany) echo $form_login;

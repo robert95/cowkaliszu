@@ -14,6 +14,9 @@
     src: url(fonts/MyriadPro-Regular.otf);
     font-weight: normal;
 }
+body, html{
+	height: 100%;
+}
 #ulubione{
 	width: 250px;
 	background-color: #1a1a1a;

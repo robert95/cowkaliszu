@@ -53,6 +53,7 @@
 	}
 	else{//nie zalogowany
 		$zalogowany = 0;
+		$per = -1;
 	}	
 	sqlClose($conn);
 ?>
@@ -94,85 +95,7 @@
 		</style>
 	</head>
 	<body>
-		<nav id="MENU">
-			<a href="index.php"><img src="img/logo.png" alt="wkaliszu" id="logo"/></a>
-			<div id="main_menu">
-				<ul id="u_menu">
-					<li><a href="index.php#event_calendar">KALENDARZ</a></li>
-					<li><a href="mapa.php">MAPA</a></li>
-					<!--<li><a href="miejsca.html">MIEJSCA</a></li>-->
-				</ul>
-			</div>
-			<div id="panel">
-				<table>
-					<tr>
-						<td><img src="img/add.png" alt="Dodaj" id="add_img"/></td>
-						<td class="add" onclick="window.location.href = 'addevent_1.php';"><a href="addevent_1.php">DODAJ WYDARZENIE</a></td>
-						<?php
-							if($zalogowany == 1)
-							{
-								echo '<td><img src="img/avatar.png" alt="nick" id="avatar"/></td>
-									<td><a href="setting.php">'.$user["login"].'</a></td>';
-							}
-							else{
-								echo '<td><img src="img/avatar.png" alt="nick" id="avatar"/></td>
-									<td><a href="login.php">Zaloguj</a></td>';
-							}
-						?>
-					</tr>
-				</table>
-			</div>
-			<div style="clear: both;"></div>
-		</nav>
-		<nav id="MENU-FIX">
-			<a href="index.php"><img src="img/logo.png" alt="wkaliszu" id="logo_fix"/></a>
-			<div id="main_menu_fix">
-				<ul id="u_menu_fix">
-					<li onclick="index.php#event_calendar"><a>KALENDARZ</a></li>
-					<li><a href="mapa.php">MAPA</a></li>
-					<!--<li><a href="miejsca.html">MIEJSCA</a></li>-->
-				</ul>
-			</div>
-			<div id="panel_fix">
-				<table>
-					<tr>
-						<td><img src="img/add.png" alt="Dodaj" id="add_img_fix"/></td>
-						<td class="add" onclick="window.location.href = 'addevent_1.php';"><a href="addevent_1.php">DODAJ WYDARZENIE</a></td>
-						<?php
-							if($zalogowany == 1)
-							{
-								echo '<td><img src="img/avatar.png" alt="nick" id="avatar_fix"/></td>
-									<td><a href="setting.php">'.$user["login"].'</a></td>';
-							}
-							else{
-								echo '<td><img src="img/avatar.png" alt="nick" id="avatar_fix"/></td>
-									<td><a href="login.php">Zaloguj</a></td>';
-							}
-						?>
-						</tr>
-				</table>
-			</div>
-			<div style="clear: both;"></div>
-		</nav>
-		<nav id="mobile_main_nav">
-			<a href="index.php"><img src="img/logo.png" alt="wkaliszu" id="logo"/></a>
-			<img src="img/menu_mobile.png" alt="Rozwiń menu" id="show_mobile_menu"/>
-			<table>
-				<tr><td onclick="doKalendarza();"><a>KALENDARZ</a></td></tr>
-				<tr><td><a href="mapa.php">MAPA</a></td></tr>
-				<tr><td><a href="addevent_1.php">DODAJ WYDARZENIE</a></td></tr>
-				<?php
-					if($zalogowany == 1)
-					{
-						echo '<tr><td><a href="setting.php">'.$user["login"].'</a></td></tr>';
-					}
-					else{
-						echo '<tr><td><a href="login.php">ZALOGUJ</a></td></tr>
-							<tr><td><a href="zarejestruj.php">ZAREJESTRUJ</a></td></tr>';
-					}
-				?>
-			</table>
-		</nav>
+		<?php include 'menu.php'?>
 		<div id="top">			
 			<section id="container">
 				<?php if($preview == 1 && $per > 0){
@@ -183,7 +106,7 @@
 							</section>';
 				}?>
 				<section id="top_events">
-					<h1 id="event_id" data-id="<?php echo $event['id']; ?>"><?php echo $event['nazwa']; ?> <?php if($is_archive) echo '<span class="s_archive"> - UWAGA! To wydarzenie już się zakończyło!</span>';?></h1>
+					<h1 id="event_id" data-id="<?php echo $event['id']; ?>"><a href="/">co.wkaliszu.pl</a> > <a href="/#kalendarz">wydarzenia</a> > <?php echo $event['nazwa']; ?> <?php if($is_archive) echo '<span class="s_archive"> - UWAGA! To wydarzenie już się zakończyło!</span>';?></h1>
 					<div id="main_event" class="main_on_eventpage">
 						<input type="hidden" id="event_info" data-title="<?php echo $event['nazwa']; ?>" data-place="<?php echo $place['nazwa']; ?>"/>
 						<input type="hidden" id="x" data-x="<?php echo $place['x']; ?>" />
@@ -196,13 +119,13 @@
 						    <div class="mainevent-title-box eventpage_desc">
 								<img src="<?php echo $kat_icon; ?>" alt="<?php echo $kat; ?>"/> <span><?php echo $kat; ?></span>
 							    <img src="img/fb.png" alt="Udostępnij" id="fbshare"/>
-								<p class="add-to-like-box"><span>Dodaj<br>do schowka</span><img src="img/add_to_fav.png" alt="Dodaj do ulubionych" data-id="<?php echo $event['id']; ?>" onClick="add_to_like(<?php echo $event['id']; ?> , this);" id="main-like-icon" class="liked_icon" style="cursor:pointer;"/></p>
+								<p class="add-to-like-box"><span>Dodaj<br>do schowka</span><img src="img/add_to_fav.png" alt="Dodaj do ulubionych" data-id="<?php echo $event['id']; ?>" id="main-like-icon" class="liked_icon" style="cursor:pointer;"/></p>
 							</div>
 							<div class="mainevent-info-box">
 								<div>
 									<h2><?php echo $event['nazwa']; ?></h2>
-									<p><?php echo $place['nazwa']; ?></p>
-									<h4><?php echo $price; ?></h4>
+									<p class="place-name"><?php echo $place['nazwa']; ?><br><?php echo $place['adres']; ?></p>
+									<h4 class="event-price"><?php echo $price; ?></h4>
 								</div>
 								<div class="mainevent-date-box">
 									<p><?php echo $readyData ?> | <?php echo $readyTime; ?></p>
@@ -226,6 +149,7 @@
 						</div>
 					</div>
 					<div id="event_right">
+						<img src="img/goToMap.png" onclick="location.href='mapa.php'" alt="Otwórz mapę" id="goToBigMap">
 						<?php /*<div id="reminder">
 							<p><img src="img/remind.png" alt="Ustaw przypomnienie"/> Ustaw przypomnienie</p>
 							*/?><?php /*if(!$zalogowany) echo '<div id="login_panel_rem">
@@ -255,36 +179,84 @@
 								<p id="saveRemaind">zapisz</p>
 							</div>
 						</div>*/?>
-						<div id="event_on_map"  style="height: 500px;">
+						<div id="event_on_map"  style="height: 500px;"></div>
+						<div id="place-more-info">
+							<div class="place-header">
+								<img src="img/markerE.png" alt="<?php echo $place['nazwa']; ?>">
+								<p class="place-name"><?php echo $place['nazwa']; ?></p>
+								<p class="place-adress"><?php echo $place['adres']; ?></p>
 							</div>
+							<p>
+								tel.: 62-759-75-57<br>
+								strona.: <a href="www.teatr.pl">www.teatr.pl</a><br><br>
+								Godziny otwarcia:<br>
+								pon. - ndz. 7:30-22:00
+							</p>
+							<img src="img/place_main.png" alt="Teatr" class="image">
+						</div>
 					</div>
 					<div id="main_event_desc">
 						<p><?php echo nl2br($event['opis']); ?></p>
 						<?php if($event['www'] != "") echo '<h6>Strona wydarzenia: <a href='.$event['www'].'>'.$event['www'].'</a></h6>'; ?>
 						<?php if($yt != "") echo '<iframe width="560" height="315" src="https://www.youtube.com/embed/'.$yt.'" frameborder="0" allowfullscreen></iframe>'; ?>
-						<h6>Dodane przez: <?php echo getUserLogin($event['id_user']);?></h6>
+						<h6 class="event-author">Dodane przez: <?php echo getUserLogin($event['id_user']);?></h6>
 					</div>
 				</section>
-				<section class="other-event-in-place">
-					<h3>Wydarzenia w tym samym miejscu</h3>
-					<?php echo getEventInPlace($event['id_miejsce'], $event['id']); ?>
-					<h6 class="more-event">Wczytaj więcej >> </h6>
+				<section class="event-comments">
+					<div class="add-comment">
+						<div class="avatar-comment">
+							<img src="img/bigavatar.png" alt="nick">
+						</div>
+						<div class="add-comment-form">
+							<form id="addNewComment">
+								<textarea name="content" placeholder="Napisz komentarz..."></textarea>
+								<input type="hidden" name="type" value="1">
+								<input type="hidden" name="id_item" id="id_item" value="<?php echo $event['id']; ?>">
+							</form>
+							<button id="addComment" onclick="add_comment();">Dodaj</button>
+						</div>
+					</div>
+					<div class="comments-list">
+						<?php echo getCommentForEvent($event['id']); ?>
+					</div>
 				</section>
 				<?php if($is_waiting && ($per == 1 || $per == 2)) echo '<div class="acceptEvent accept" data-id="'.$event['id'].'">AKCEPTUJ</div>';?>
+				<section class="other-event-in-place other-ev-in-place">
+					<h3>Wydarzenia w tym samym miejscu</h3>
+					<?php echo getEventInPlace($event['id_miejsce'], $event['id']); ?>
+					<p class="more-event">Wczytaj więcej >> </p>
+				</section>
+				<section class="other-event-in-place other-ev-in-cat">
+					<h3>Wydarzenia z tej samej kategorii</h3>
+					<?php echo getEventInSameCategory($event['id_kat'], $event['id']); ?>
+					<p class="more-event-incat">Wczytaj więcej >> </p>
+				</section>
+				<section class="other-event-in-place near-restaurant">
+					<h3>Gdzie zjeść w pobliżu wydarzenia</h3>
+					<?php echo getNearRestuarant($event['id_miejsce']); ?>
+				</section>
 			</section>
-			<footer>
+		</div>
+		<footer>
+			<div class="cont">
 				<a href="regulamin.php">Regulamin i polityka prywatno&#347;ci</a>
 				<a style="float: right; margin-right: 20px;" href="http:\\www.pinkelephant.pl"> Projekt www.pinkelephant.pl</a>
-			</footer>
+			</div>
+		</footer>
+		<div id="confirm_delete">
+			<p>Czy na pewno chcesz usunąć ten komentarz?</p>
+			<img src="img/confirm_yes.png" class="yes" alt="TAK" onclick="deleteCom();"/>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<img src="img/confirm_no.png" class="no" alt="NIE" onclick="closeParent();"/>
 		</div>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-		<script src="https://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
+		<script src="https://maps.google.com/maps/api/js?key=AIzaSyDa4nN-bDVonpOyK5S7HAx23krp3ZBRLhE&sensor=false" type="text/javascript"></script>
 		<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 		<script type="text/javascript" src="js/skrypt_eventpage.js"> </script> 
 		<script type="text/javascript" src="js/skrypt_liked.js"></script>
 		<script type="text/javascript" src="js/scripts_eve.js"></script>
 		<script type="text/javascript" src="js/skrypt_remider.js"></script>
         <script type="text/javascript" src="js/skrypt_widget.js"></script>
+        <script type="text/javascript" src="js/skrypt_comment.js"></script>
+		<?php if($per >=1 ) echo '<script type="text/javascript" src="js/skrypt_editcomment.js"></script>';?>
 		<div id="fb-root"></div>
 		<script>/*(function(d, s, id) {
 		  var js, fjs = d.getElementsByTagName(s)[0];
