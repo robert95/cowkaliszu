@@ -9,8 +9,8 @@ $( document ).ready(function() {
 	filterData = $("#filterData").val()!="" ? $("#filterData").val() : new Date();
 	$("#datepicker").datepicker('setDate', filterData);
 	/*data = wczoraj(data);
-	odswiezSwitcher(true);
-	$("#datepicker").hide();*/
+	odswiezSwitcher(true);*/
+	//$("#datepicker").hide();
 	mapaStart();
 	
 	var s = $("#stick_map");
@@ -20,7 +20,7 @@ $( document ).ready(function() {
     $(window).scroll(function() {
 		var windowpos = $(window).scrollTop();
 		var widthParent = s.width();
-        if (windowpos >= off.top ) {
+        if (windowpos+40 >= off.top ) {
             s.addClass("stick");
 			$("#empty_stick_map").show();
 			s.css("left", off.left);
@@ -32,11 +32,20 @@ $( document ).ready(function() {
 			s.attr('style', function(i, style){return style.replace(/width[^;]+;?/g,'');
 			});
         }
-		
-		if($(window).scrollTop() == $(document).height() - $(window).height()) {
+		if($(window).scrollTop()+100 > $(document).height() - $(window).height()) {
 			loadMoreEvents();
 		}
     });
+	
+	$(document).mouseup(function (e){
+		var container = $("#datepicker");
+
+		if (!container.is(e.target) 
+			&& container.has(e.target).length === 0)
+		{
+			container.hide();
+		}
+	});
 	
 	$('.fb-share-event').click(function() {
 		var link = $(this).data('href');
@@ -57,7 +66,7 @@ $(function() {
 	$( "#datepicker" ).datepicker({
 		dateFormat: 'yy-mm-dd',
 		dayNamesMin: [ "Nie", "Pon", "Wt", "Śr", "Cz", "Pt", "So" ],
-		monthNames: [ "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień" ],
+		monthNames: [ "styczeń", "luty", "marzec", "kwiecień", "maj", "czerwiec", "lipiec", "sierpień", "wrzesień", "październik", "listopad", "grudzień" ],
 		beforeShowDay: function(d) {
 			var today = new Date(); 
 			if(today < d || d.sameDay(today)){
@@ -66,21 +75,15 @@ $(function() {
 				return [true,"beforeToday",""]; 
 			}
 		},
+		firstDay: 1,
 		defaultDate: filterData
 	});
 	odwiedzWydarzenia();
 });
 $("#datepicker").on("change",function(){
-	//location.reload(); 
-	/*var selected = $(this).val();
-	data = new Date(selected);
-	data = wczoraj(data);
-	odswiezSwitcher(true);*/
 	setLink();
 	odwiedzWydarzenia();
-	/*$(this).hide();*/
-	//alert(jutro(data).toISOString().slice(0,10).replace(/-/g,"-"));
-	//alert(wczoraj(data).toISOString().slice(0,10).replace(/-/g,"-"));		
+	$("#datepicker").hide();	
 });
 
 function jutro(dzis){
@@ -145,8 +148,8 @@ function polskaNazwaMiesiaca(a){
 }
 
 function pokaz(){
-	/*$("#datepicker").show();
-	odwiedzWydarzenia();*/
+	$("#datepicker").show();
+	/*odwiedzWydarzenia();*/
 }
 
 function getFormattedDate(d){
@@ -163,6 +166,7 @@ var lastDataWithEvent = false;
 function odwiedzWydarzenia(d, a){
 	if(lastDataWithEvent != d) allDayisLoaded = false;
 	if(!blockLoadNewEvents){
+		blockLoadNewEvents = true;
 		if(!allDayisLoaded) $(".loading-panel").show();
 		newDayisLoaded = false;
 		if(!d) d = $("#datepicker").val();

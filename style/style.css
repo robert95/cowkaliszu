@@ -277,6 +277,7 @@ h1, h3{
 #main_event .mainevent_img_on_eventpage img{
 	width: 100%;
 	top: 0 !important;
+	vertical-align: middle;
 }
 .archive{
 	position: absolute;
@@ -488,7 +489,30 @@ h1, h3{
 	color: #999999;
 }
 #container_calendar{
-	background-color: white;
+/*	background-color: white;*/
+}
+.open-filter-panel{
+	background: white none repeat scroll 0% 0%;
+	display: inline-block;
+	cursor: pointer;
+	position: relative;
+	margin-right: 20px;
+}
+.price-filtr-container{
+	background: none;
+	display: inline-block;
+	margin-right: 0px;
+}
+.open-filter-panel:hover > span{
+	color: black;
+}
+.open-filter-panel  > span{
+	font-size: 15px;
+	padding: 0px 11px;
+	color: rgb(94, 175, 180);
+}
+.open-filter-panel img{
+	vertical-align: middle;
 }
 #event_calendar{
 	clear: both;
@@ -804,6 +828,81 @@ footer a:hover{
 	display: block;
 	margin-top: 10px;
 }
+.filter-container #datepicker{
+	background-color: white;
+	display: none;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	width: 315px;
+	z-index: 4;
+	margin-top: 0px;
+}
+.filter-container #datepicker .ui-datepicker-inline{
+	display: block !important;
+	width: 310px !important;
+	background: white none repeat scroll 0% 0% !important;
+	padding: 4px !important;
+	font-size: 15px !important;
+}
+.filter-container #datepicker .ui-datepicker-header a{
+	overflow: hidden;
+}
+.filter-container #datepicker .ui-datepicker-header{
+	background: #5eafb4 !important;
+	font-size: 23px !important;
+	font-family: "Apolonia" !important;
+	font-weight: normal !important;
+}
+.filter-container #datepicker .ui-datepicker-calendar thead span{
+	color: #c90000 !important;
+	font-size: 12px !important;
+	font-family: "Apolonia" !important;
+}
+.filter-container #datepicker .ui-datepicker-calendar tbody a{
+	font-size: 23px !important;
+	color: rgb(94, 175, 180) !important;
+	font-family: "Apolonia" !important;
+}
+.filter-container #datepicker .ui-datepicker-calendar .ui-datepicker-week-end a{
+	color: #c90000 !important;
+}
+.filter-container #datepicker .ui-datepicker-year{
+	display: none !important;
+}
+.filter-container #datepicker  .ui-datepicker-prev {
+	background: transparent none repeat scroll 0% 0% !important;
+	border: 0px none !important;
+	top: 2px !important;
+	left: 2px !important;
+}
+.filter-container #datepicker  .ui-icon.ui-icon-circle-triangle-w {
+    background: url('cal-prev.png');    
+	background-size: auto 100%;
+    background-repeat: no-repeat;
+}
+.filter-container #datepicker   .ui-datepicker-next{
+	background: transparent none repeat scroll 0% 0% !important;
+	border: 0px none !important;
+	top: 2px !important;
+	right: 2px !important;
+}
+.filter-container #datepicker   .ui-icon.ui-icon-circle-triangle-e {
+    background: url('cal-next.png');    
+	background-size: auto 100%;
+    background-repeat: no-repeat;
+}
+.filter-container #datepicker  .ui-datepicker-current-day {
+    background-color: rgb(94, 175, 180) !important;
+	color: white !important;
+}
+.filter-container #datepicker  .ui-datepicker-current-day a.ui-state-active{
+	color: white !important;
+}
+.filter-container #datepicker  .ui-datepicker-calendar tbody  a.ui-state-hover{
+	color: white !important;
+	background-color: rgb(94, 175, 180) !important;
+}
 .today{
 	color: #f2f2f2 !important;
 	background-color: black !important;
@@ -832,7 +931,7 @@ footer a:hover{
 }
 .stick{
     position: fixed;
-	top: 0px;
+	top: 40px;
 /*	width: 360px !important;*/
 }
 .acceptEvent{
@@ -1023,10 +1122,18 @@ iframe{
 #container_calendar{
 	display: flex;
 }
-.filter-container{
-	width: 187px;
+.cat-filter-container{
+	display: none;
+	position: fixed;
+	text-align: center;
 	color: white;
-	background-color: black;
+	font-size: 22px;
+	width: 100%;
+	height: 100%;
+	left: 0%;
+	top: 0px;
+	background-color: rgba(0, 0, 0, 0.85);
+	z-index: 1500;
 }
 .head-filter{
 	font-size: 16px;
@@ -1050,39 +1157,82 @@ iframe{
 	position: relative;
 }
 .filter-container li{
-	font-size: 15px;
-	font-weight: light;
-	color: #b0b0b0;
-	display: block;
-	margin: 3px 0;
-	padding: 3px 2px;
-}
-.filter-container .active-all-options .activ-option{
-	color: #b0b0b0 !important;
-	background: none !important;
+	font-size: 22px;
+	display: inline-block;
+	padding: 10px 25px;
+	margin: 4px;
+	background: #b3b3b3;
+	color: white;
 }
 .filter-container li:hover, .filter-container .activ-option{
 	cursor: pointer;
+	background: #69b3b5;
+}
+.cat-filter-btns{
+	text-align: center;
+	margin-top: 50px;
+}
+.cat-filter-btn{
+	font-size: 22px;
+	display: inline-block;
+	padding: 10px 25px;
+	margin: 4px;
+	color: white;
+	cursor: pointer;
+	border: 0;
+}
+.back-filter{
+	background: black;
+}
+.back-filter:hover{
 	color: black;
-	background: #e9a800;
+	background: white;
+}
+.accept-filter{
+	background: #c5324a;
+}
+.accept-filter:hover{
+	color: #c5324a;
+	background: white;
+}
+.vertical-center-wrap{   
+	display: flex;
+    justify-content: center;
+    align-items: center;
+	height: 100%;
+}
+.cat-filter-container p{   
+	font-size: 27px;
+	color: white;
+	margin-bottom: 35px;
+}
+.list-of-activ-kategory div{
+	color: white;
+	padding: 10px 20px;
+	display: inline-block;
+	background: rgb(105, 179, 181) none repeat scroll 0% 0%;
+	font-size: 22px;
+	margin: 10px 5px 5px 0;
+	position: relative;
+}
+.list-of-activ-kategory img{
+	height: 13px;
+	cursor: pointer;
+	position: absolute;
+	top: 5px;
+	right: 4px;
+	display: none;
+}
+.list-of-activ-kategory div:hover img{
+	display: block;
 }
 .filter-container ul{
 	padding: 0;
-	margin: 10px 0 0px 0;
-}
-.filter-container button, .filter-container button:hover{
-	font-size: 13px;
-	font-weight: light;
-	color: black;
-	padding: 2px 10px;
-	background: #b0b0b0;
-	border: 0;
-	display: none;
-}
-.filter-container .activ-btn{
-	cursor: pointer;
-	color: black;
-	background: #e9a800;
+	display: block;
+	width: 80%;
+	word-wrap: break-word;
+	margin: auto;
+	max-width: 1000px;
 }
 .event-list-in-calendar{
 	-webkit-flex: 1 1 auto;
@@ -1095,8 +1245,7 @@ iframe{
 	font-weight: light;
 	font-size: 32px;
 	color: black;
-	border-bottom: 1px solid #b0b0b0;
-	margin: 9px 0 0 0;
+	margin: 30px 0 5px 0;
 	padding: 10px 0;
 }
 .day-header span{
@@ -1416,6 +1565,90 @@ iframe{
 }
 #confirm_delete img{
 	cursor: pointer;
+}
+.rad{
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  color: rgb(94, 175, 180);
+  font-size: 15px;
+  margin-right: 5px;
+}
+.rad > input{ 
+  visibility: hidden;
+  position: absolute;
+}
+.rad > i{     
+  display: inline-block;
+  vertical-align: middle;
+  width:  25px;
+  height: 25px;
+  border-radius: 50%;
+  transition: 0.2s;
+  box-shadow: inset 0 0 0 15px #fff;
+  border: 1px solid gray;
+  background: gray;
+}
+.rad:hover > i{ 
+  box-shadow: inset 0 0 0 6px #fff;
+  background: gray;
+}
+.rad > input:checked + i{ 
+  box-shadow: inset 0 0 0 6px #fff;
+  background: rgb(94, 175, 180);
+}
+.event-n{ 
+	display: flex;
+	font-size: 17px;
+	color: black;
+	width: 100%;
+	margin-top: 10px;
+}
+.event-th-n{ 
+	width: 50%;
+}
+.event-th-n img{ 
+    width: 100%;
+	cursor: pointer;
+    vertical-align: bottom;
+}
+.event-desc-cont-n{ 
+	width: 50%;
+	background: white;
+	position: relative;
+}
+.event-desc-n{ 
+	padding: 20px;
+	position: absolute;
+	bottom: 0;
+	width: calc(100% - 40px);
+}
+.event-desc-n a{  
+	text-decoration: none;
+	color: #999999;
+}
+.event-desc-n a:hover{  
+	cursor: pointer;
+	color: rgb(94, 175, 180);
+}
+.event-cat-n{ 
+	color: #999999;
+}
+.event-tit-n{    
+	font-size: 22px;
+    border-bottom: 1px solid #999999;
+    padding-bottom: 18px;
+    margin: 30px 0px !important;
+}
+.event-tit-n a{    
+	color: black;
+}
+.event-desc-n p span{ 
+	color: #999999;
+}
+.event-desc-n p{ 
+	margin: 16px 0;
 }
 @media screen and (max-width: 1000px) {
 	#mobile_main_nav{

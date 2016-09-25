@@ -65,18 +65,22 @@
 	}
 	
 	function pricesAsListToFilter($filterPrice){
-		$countPricesInFilter = count($filterPrice);
-		$filterIsNotUsed = ($countPricesInFilter == 0);
-		$wyj = '<ul class="price-list ';
-		if($countPricesInFilter == 0) $wyj .= "active-all-options";
-		$wyj .= '">';
+		$all = (count($filterPrice) == 0) ? 'checked="checked"' : "";
+		$pay = in_array("platne", $filterPrice) ? 'checked="checked"' : "";
+		$free = in_array("bezplatne", $filterPrice) ? 'checked="checked"' : "";
 		
-		$class = (in_array("platne", $filterPrice) || $filterIsNotUsed) ? "activ-option" : "";
-		$wyj .= '<li data-id="0" data-slu="platne" class="'.$class.'">płatne</li>';
-		$class = (in_array("bezplatne", $filterPrice) || $filterIsNotUsed) ? "activ-option" : "";
-		$wyj .= '<li data-id="1" data-slu="bezplatne" class="'.$class.'">wstęp wolny</li>';
-		
-		$wyj .= '</ul>';
+		$wyj = '<label class="rad">
+			<input type="radio" name="price" value="0" '.$pay.'/>
+			<i></i> płatne
+		</label>
+		<label class="rad">
+			<input type="radio" name="price" value="1" '.$free.'/>
+			<i></i> bezpłatne
+		</label>
+		<label class="rad">
+			<input type="radio" name="price" value="2" '.$all.'/>
+			<i></i> wszystkie
+		</label>';
 		return $wyj;
 	}
 	

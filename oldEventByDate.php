@@ -36,25 +36,7 @@
 			
 			$free = $price != "wstęp wolny" ? "false" : "true";
 			
-			$wyj .= '<div class="event-n event" onmouseover="zaznaczNaMapie(this);" id="e_'.$i.'" data-x="'.$place['x'].'" data-y="'.$place['y'].'" data-title="'.$e['nazwa'].'" data-place="'.$place['nazwa'].'" data-id="'.$e['id'].'" data-date="'.$e['data'].'" data-time="'.$e['czas'].'" data-date_end="'.$e['data_end'].'" data-time_end="'.$e['czas_end'].'" data-idkat="'.$e['id_kat'].'" data-free="'.$free.'">
-						<div class="event-th-n">
-							<a href="'.$link.'">
-								<img src="'.$e['miniatura'].'" alt="'.$e['nazwa'].'"  class="eve-thumb">
-							</a>
-						</div>
-						<div class="event-desc-cont-n">
-							<div class="event-desc-n">
-								<div>
-								</div>
-								<p class="event-cat-n">'.$kat["nazwa"].'</p>
-								<p class="event-tit-n"><a href="'.$link.'">'.$e['nazwa'].'</a></p>
-								<p>Gdzie: <span><a href="#">'.$place['nazwa'].'</a></p>
-								<p>O której: <span>'.substr($e['czas'], 0, 5).'</span></p>
-								<p>Bilety: <span>'.$price.'</span></p>
-							</div>
-						</div>
-					</div>';
-		/*$wyj .= '<div class="event-day event"  onmouseover="zaznaczNaMapie(this);" id="e_'.$i.'" data-x="'.$place['x'].'" data-y="'.$place['y'].'" data-title="'.$e['nazwa'].'" data-place="'.$place['nazwa'].'" data-id="'.$e['id'].'" data-date="'.$e['data'].'" data-time="'.$e['czas'].'" data-date_end="'.$e['data_end'].'" data-time_end="'.$e['czas_end'].'" data-idkat="'.$e['id_kat'].'" data-free="'.$free.'">
+			$wyj .= '<div class="event-day event"  onmouseover="zaznaczNaMapie(this);" id="e_'.$i.'" data-x="'.$place['x'].'" data-y="'.$place['y'].'" data-title="'.$e['nazwa'].'" data-place="'.$place['nazwa'].'" data-id="'.$e['id'].'" data-date="'.$e['data'].'" data-time="'.$e['czas'].'" data-date_end="'.$e['data_end'].'" data-time_end="'.$e['czas_end'].'" data-idkat="'.$e['id_kat'].'" data-free="'.$free.'">
 						<a href="'.$link.'">
 							<img src="'.$e['miniatura'].'" alt="'.$e['nazwa'].'"  class="eve-thumb">
 						</a>
@@ -69,7 +51,7 @@
 								<p><img src="'.$liked_icon.'" alt="Dodaj do ulubionych" onClick="add_to_like('.$e["id"].', this)" data-id="'.$e["id"].'" class="liked_icon"/><img src="img/facebook-icon.png" class="fb-share-event" data-href="'.$link.'"></p>
 							</div>
 						</div>
-					</div>';*/
+					</div>';
 			$i++;
 		}
 		$wyj .= '</div>

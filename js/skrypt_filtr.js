@@ -1,5 +1,5 @@
 $( document ).ready(function() {
-	
+	setActivCatList();
 });
 /********-- Filtrowanie po kategoriach tylko w kalendarzu --********/
 $(".head-filter").click(function() {
@@ -14,7 +14,6 @@ $(".head-filter").click(function() {
 });
 
 $(".cat-list li").click(function() {
-	$(".cat-filter-btn").addClass('activ-btn');
 	$(".cat-list").removeClass('active-all-options');
 	var clickOpt = $(this);
 	if($(".cat-list li").length == $(".cat-list .activ-option").length){
@@ -36,28 +35,25 @@ $(".cat-list li").click(function() {
 			}*/
 		}
 	}
-	setLink();
-	runFilter();
 });
 
-$(".price-list li").click(function() {
-	$(".price-filter-btn").addClass('activ-btn');
-	$(".price-list").removeClass('active-all-options');
-	var clickOpt = $(this);
-	if($(".price-list li").length == $(".price-list .activ-option").length){
-		$(".price-list .activ-option").removeClass('activ-option');
-		clickOpt.addClass('activ-option');
-	}else{
-		if(clickOpt.hasClass('activ-option')){
-			clickOpt.removeClass('activ-option');
-			if($(".price-list .activ-option").length == 0){
-				$(".price-list").addClass('active-all-options');
-				$(".price-list li").addClass('activ-option');
-			}
-		}else{
-			clickOpt.addClass('activ-option');
-		}
-	}
+$('.accept-filter').click(function() {
+	setLink();
+	runFilter();
+	setActivCatList();
+	$(".cat-filter-container").hide('fade');
+});
+
+$('.back-filter').click(function() {
+	$(".cat-filter-container").hide('fade');
+	updateActiveCats();
+});
+
+$('.show-cat-filter-btn').click(function() {
+	$(".cat-filter-container").show('fade');
+});
+
+$('input[type=radio][name=price]').change(function() {
 	setLink();
 	runFilter();
 });
@@ -182,9 +178,13 @@ function runFilter(){
 	$('.cat-list .activ-option').each(function(){
 		cats.push($(this).data('id'));
 	});
-	$('.price-list .activ-option').each(function(){
-		prices.push($(this).data('id'));
-	});
+	
+	if($('input[name=price]:checked').val() == 2){
+		prices.push(1);
+		prices.push(0);
+	}else{
+		prices.push(parseInt($('input[name=price]:checked').val()));
+	}
 	
 	$('.event').each(function(){
 		var idCat = $(this).data('idkat');
@@ -214,18 +214,64 @@ function setLink(){
 	var data = $("#datepicker").val();
 	if(data!="") link += "/data/"+data;
 	
-	if($(".price-list li").length != $(".price-list .activ-option").length && $(".price-list .activ-option").length > 0){
-		link += "/cena/";
-		$( ".price-list .activ-option" ).each(function( index ) {
-			link += $(this).data('slu') + "-";
-		});
-		link = link.slice(0, -1);
+	if($('input[name=price]:checked').val() == 0){
+		link += "/cena/platne";
+	}
+	if($('input[name=price]:checked').val() == 1){
+		link += "/cena/bezplatne";
 	}
 	
 	link += ".html";
 	
 	//ZMIANA po przeniesieniu na serwer!!! usunąć /cowkaliszu
 	window.history.pushState("", "", '/cowkaliszu'+link);
+}
+
+function updateActiveCats(){
+	var arr = window.location.pathname.split('/');
+	if(arr.indexOf("kategoria") == -1){
+		$(".cat-list").addClass('active-all-options');
+		$(".cat-list li").addClass('activ-option');
+	}
+	for (i=0; i < arr.length; i+=2){
+		k = arr[i];
+		v = arr[i+1];
+		if(k == "kategoria"){
+			var filterCats = v.split('-');
+			$( ".cat-list li" ).each(function( index ) {
+				var slu = $(this).data('slu');
+				if(filterCats.indexOf(slu) > -1) $(this).addClass('activ-option');
+				else $(this).removeClass('activ-option');
+				if(index+1 == $( ".cat-list li" ).length){
+					if($( ".cat-list .activ-option" ).length == 0){
+						$(".cat-list").addClass('active-all-options');
+						$(".cat-list li").addClass('activ-option');
+					}
+				}
+			});
+		}
+	}
+}
+
+function setActivCatList(){
+	$(".list-of-activ-kategory").html("");
+	if(!($(".cat-list").hasClass('active-all-options'))){
+		$('.cat-list .activ-option').each(function(){
+			var name = $(this).text();
+			var id = $(this).data('id');
+			var html = '<div>' + name + '<img src="img/confirmW_no.png" alt="Usun" onclick="uncheckThisCat(' + id + ');"></div>';
+			$(".list-of-activ-kategory").append(html);
+		});
+	}	
+}
+
+function uncheckThisCat(id){
+	$('.cat-list .activ-option').each(function(){
+		if(id == $(this).data('id')){
+			$(this).click();
+			$('.accept-filter').click();
+		}
+	});
 }
 /********-- KONIEC Filtrowanie po kategoriach tylko w kalendarzu KONIEC--********/
 

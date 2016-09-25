@@ -32,16 +32,18 @@
 	$filterCats = array();
 	$filterData = "";
 	$filterPrice = array();
-	$arr = explode('/',$_GET['url']);
-	for ($i=0; $i < count($arr); $i+=2){
-		$k = $arr[$i]; //nazwa parametru
-		$v = isset($arr[$i+1]) ? $arr[$i+1] : ''; //wartość parametru
-		if($k == "kategoria"){
-			$filterCats = explode('-',$v);
-		}else if($k == "data"){
-			$filterData = $v;
-		}else if($k == "cena"){
-			$filterPrice = explode('-',$v);
+	if(isset($_GET['url']))	{
+		$arr = explode('/',$_GET['url']);
+		for ($i=0; $i < count($arr); $i+=2){
+			$k = $arr[$i]; //nazwa parametru
+			$v = isset($arr[$i+1]) ? $arr[$i+1] : ''; //wartość parametru
+			if($k == "kategoria"){
+				$filterCats = explode('-',$v);
+			}else if($k == "data"){
+				$filterData = $v;
+			}else if($k == "cena"){
+				$filterPrice = explode('-',$v);
+			}
 		}
 	}
 /*filtrowanie*/	
@@ -96,31 +98,22 @@
 				<section id="event_calendar">
 					<h3>KALENDARZ - zobacz, co dzieje się w wybranym dniu</h3>
 					<div id="container_calendar">
-						<?php //echo categoriesAsIcon(); ?>
-						<div class="filter-container">
-							<div class="filter-elem cat-filtr-container extendend-filter">
-								<p class="head-filter">Kategoria</p>
-								<div class="extend-part-filter">
-									<?php echo categoriesAsListToFilter($filterCats); ?>
-									<button disabled class="accept-filter cat-filter-btn">Zastosuj</button>
-								</div>
-							</div>
-							<div class="filter-elem data-filtr-container extendend-filter">
-								<p class="head-filter" onclick="pokaz();">Data</p>
-								<div class="extend-part-filter">
-									<div id="datepicker"></div>
-								</div>
-								<input type="hidden" id="filterData" value="<?php echo $filterData; ?>">
-							</div>
-							<div class="filter-elem price-filtr-container extendend-filter">
-								<p class="head-filter">Bilety</p>
-								<div class="extend-part-filter">
-									<?php echo pricesAsListToFilter($filterPrice); ?>
-									<button disabled class="accept-filter price-filter-btn">Zastosuj</button>
-								</div>
-							</div>
-						</div>
 						<div class="event-list-in-calendar">
+							<div class="filter-in-main filter-container">
+								<div class="open-filter-panel show-cat-filter-btn">
+									<span>Filtruj wydarzenia</span> <img src="img/arrow-down.png" alt="filtruj wydarzenia">
+								</div>
+								<div class="open-filter-panel data-filtr-container data-filter-btn">
+									<span onclick="pokaz();">Wybierz dzień</span> <img src="img/show-cal.png" alt="Wybierz dzień" onclick="pokaz();">
+									<div id="datepicker"></div>
+									<input type="hidden" id="filterData" value="<?php echo $filterData; ?>">
+								</div>
+								<div class="open-filter-panel price-filtr-container">
+									<?php echo pricesAsListToFilter($filterPrice); ?>
+								</div>
+								<div class="list-of-activ-kategory">
+								</div>
+							</div>
 							<div class="event-list">
 							</div>
 							<p class="day-header no-events">Przykro nam, nie ma wydarzeń spełniających Twoje kryteria:(</p>
@@ -128,40 +121,6 @@
 								<img src="img/loading.gif" alt="Ładowanie">
 							</div>
 						</div>
-						<!--<div id="calendar">
-							<div id="calendar_menu">
-								<!--<img class="b_k_s" src="img/show_cat.png" id="list_of_cat"/>-->
-								<!--<span class="b_k_s">kategorie</span>
-								<p><span id="mmYY">sierpien 2015</span> <img src="img/show_cal.png" onclick="pokaz();"/></p>
-							</div>
-							<div id="switcher_date">
-								<a class="nextDay" onclick="odswiezSwitcher(false);"><</a>
-								<a>23</a>
-								<a>24</a>
-								<a>25</a>
-								<a>26</a>
-								<a>27</a>
-								<a>28</a>
-								<a>29</a>
-								<a class="prevDay" onclick="odswiezSwitcher(true);">></a>
-							</div>
-							<div id="checklist_categorie">
-								<div style="display:none;" class="cat_on_list">
-									<img src="img/pic_cat.png" alt="nazwa kategorii" />
-									<span>wszystkie</span>
-									<img class="cat_ch" data-check="1" data-id="-1" src="img/checked.png" alt="pokaż/ukryj" id="k_all"/>
-								</div>
-								<?php //echo $catDiv; ?>
-							</div>
-							<div id="events">		
-								<div id="switcher_event">
-									<a>1</a>
-									<a>2</a>
-									<a>3</a>
-									<a>></a>
-								</div>
-							</div>
-						</div>-->
 						<div id="stick_map" class="">
 							<div id="map">
 							</div>
@@ -178,6 +137,18 @@
 				<a style="float: right; margin-right: 20px;" href="http:\\www.pinkelephant.pl"> Projekt www.pinkelephant.pl</a>
 			</div>
 		</footer>
+		<div class="cat-filter-container filter-container">
+			<div class="vertical-center-wrap">
+				<div class="filter-elem cat-filtr-container extendend-filter">
+					<p>Co cię interesuje?</p>
+					<?php echo categoriesAsListToFilter($filterCats); ?>
+					<div class="cat-filter-btns">
+						<button class="back-filter cat-filter-btn">Anuluj</button>
+						<button class="accept-filter cat-filter-btn">Potwierdź</button>
+					</div>
+				</div>
+			</div>
+		</div>
 		<link rel="stylesheet" type="text/css" href="style/style_calendar.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 		<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
