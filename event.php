@@ -14,7 +14,7 @@
 	addVisitorToEvent($id, $conn);
 	
 	$event = getEvent($conn, $id);
-	$place = getPlace($conn, $event['id_miejsce']);
+	$place = getPlace($event['id_miejsce']);
 	$kat = getCategoryName($conn, $event['id_kat']);
 	$kat_icon = getCategoryIcon($conn, $event['id_kat']);
 	

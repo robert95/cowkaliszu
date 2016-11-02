@@ -41,6 +41,42 @@
 		}*/
 		move_uploaded_file($_FILES["image"]["tmp_name"], $target_file);
 		return $target_file;
+	}	
+	
+	function savePhotoFromBase64($name, $data){
+		$name = generatePhotoName($name);
+		$target_file = 'img/'.$name.'.png';
+		$data = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data));
+		file_put_contents($target_file, $data);
+		return $target_file;
+	}
+	
+	function generatePhotoName($name){
+		$slug = makeSlug($name);
+		return uniqid().'-'.$slug;
+	}
+	
+	function saveThumbPhoto($name, $image, $width){
+		$targ_w = $targ_h = 300;
+		$jpeg_quality = 9;
+		$name = generatePhotoName($name);
+		$target_file = 'img/'.$name.'.png';
+		$img_r = imagecreatefromstring(file_get_contents($image));
+		$x = $_POST['X'];
+		$y = $_POST['Y'];
+		$w = $_POST['W'];
+		$realW = imagesx($img_r);
+		$realY = imagesy($img_r);
+		$p = $realW/$width;
+		$x *= $p;
+		$y *= $p;
+		$w *= $p;
+		
+		$dst_r = ImageCreateTrueColor( $targ_w, $targ_h );
+		imagecopyresampled($dst_r,$img_r,0,0,$x,$y,
+			$targ_w,$targ_h,$w,$w);
+		imagepng($dst_r, $target_file, $jpeg_quality);
+		return $target_file;
 	}
 	
 	function saveIconEvent($id, $image, $width)
@@ -61,7 +97,6 @@
 		$x *= $p;
 		$y *= $p;
 		$w *= $p;
-		
 		
 		$dst_r = ImageCreateTrueColor( $targ_w, $targ_h );
 
@@ -384,4 +419,17 @@
 		sqlClose($con);
 	}
 	
+	function makeSlug($text){
+		$text = notPolishLink($text);
+		$text = preg_replace('~[^\pL\d]+~u', '-', $text);
+		$text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+		$text = preg_replace('~[^-\w]+~', '', $text);
+		$text = trim($text, '-');
+		$text = preg_replace('~-+~', '-', $text);
+		$text = strtolower($text);
+		if (empty($text)) {
+		return 'n-a';
+		}
+		return $text;
+	}
 ?>

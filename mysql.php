@@ -341,65 +341,6 @@
 		$con->query($sql);
 	}
 	
-	function addPlaceDB($con, $name, $id_kat, $opis, $x, $y, $adress){
-		$sql = "INSERT INTO `miejsce`(`nazwa`, `id_kat`, `opis`, `x`, `y`, `adres`) VALUES ('".$name."',".$id_kat.",'".$opis."',".$x.",".$y.",'".$adress."')"; 
-		$con->query($sql);	
-	}
-	
-	function getPlaceFirstLetter($con)
-	{	
-		$wyj = "";
-		for($i = 65; $i < 91; $i++)
-		{
-			if($i%2 == 1) {$wyj.="<tr class='letterTR'>\n";}
-			$wyj.='<td class="letter"><table>
-							<tr><th>'.chr($i).'</th></tr>';
-			$sql = "SELECT * FROM `miejsce` WHERE `nazwa` LIKE '".chr($i)."%'"; 
-			$result=$con->query($sql);
-			while($row = $result->fetch_assoc()) {				
-				$wyj .= '<tr><td><a class="set_place" data-id="'.$row["id"].'">'.$row["nazwa"].'</a></td></tr>';					
-			}
-			$wyj .= '</table></td>';
-			if($i%2 == 0) {$wyj.="</tr>";} 
-		}	
-		return $wyj;
-	}
-	
-	function getPlaceFirstLetterForLittlePanel($con)
-	{	
-		$wyj = "";
-		for($i = 65; $i < 91; $i++)
-		{
-			$wyj.='<tr><th>'.chr($i).'</th></tr>';
-			$sql = "SELECT * FROM `miejsce` WHERE `nazwa` LIKE '".chr($i)."%'"; 
-			$result=$con->query($sql);
-			while($row = $result->fetch_assoc()) {				
-				$wyj .= '<tr><td><a class="set_place" data-id="'.$row["id"].'">'.$row["nazwa"].'<a/></td></tr>';					
-			}
-		}	
-		return $wyj;
-	}
-	
-	function getPlace($conn, $id){
-		$query="SELECT * FROM `miejsce` WHERE `id` = ".$id."";
-		$result=$conn->query($query);
-		while($row = $result->fetch_assoc()) {		
-			return $row;
-		}
-	}
-	
-	function placesAsSelectWithSelected($conn, $id){
-		$query="SELECT * FROM `miejsce`";
-		$result=$conn->query($query);
-		$wyj="";
-		while($row = $result->fetch_assoc()) {
-			if($row["id"] == $id) $s = "selected";
-			else $s = "";
-			$wyj .= '<option value="'.$row["id"].'" '.$s.' data-x="'.$row["x"].'" data-y="'.$row["y"].'">'.$row["nazwa"].'</option>';			
-		}
-		return $wyj;
-	}
-	
 	function getPopularEvent($conn, $cat = 0)
 	{
 		if($cat == 0 ){
@@ -411,7 +352,7 @@
 		$result=$conn->query($query);
 		$wyj="";
 		while($row = $result->fetch_assoc()) {
-			$place = getPlace($conn, $row["id_miejsce"]);
+			$place = getPlace($row["id_miejsce"]);
 			$place = $place['nazwa'];
 			$data = convertToCoolDate($row['data']);
 			$wyj .= '<div class="popular" id="'.$row["id"].'" onclick="location.href=\''.linkToEvent($row["id"]).'\'">
@@ -443,7 +384,7 @@
 			if($i<8 && (!(in_array( $row['grupa'] , $alreadyShow))))
 			{
 				if($row['grupa'] > 0) array_push($alreadyShow,$row['grupa']);
-				$place = getPlace($conn, $row["id_miejsce"]);
+				$place = getPlace($row["id_miejsce"]);
 				$place = $place['nazwa'];
 				$kat = getCategory($conn, $row["id_kat"]);
 				$data = $row["data"];
@@ -503,7 +444,7 @@
 		$result=$conn->query($query);
 		$wyj="";
 		while($row = $result->fetch_assoc()) {
-			$place = getPlace($conn, $row["id_miejsce"]);
+			$place = getPlace($row["id_miejsce"]);
 			$kat = getCategory($conn, $row["id_kat"]);
 			//$data = convertToCoolDate($row['data']);
 			$data = convertToCoolDate($row['data']);
@@ -577,7 +518,7 @@
 		$result=$conn->query($query);
 		$wyj="";
 		while($row = $result->fetch_assoc()) {	
-			$p = getPlace($conn, $row['id_miejsce']);
+			$p = getPlace($row['id_miejsce']);
 			$wyj.='<div class="event" 
 					data-id="'.$row['id'].'" 
 					data-x="'.$p['x'].'" 
@@ -701,7 +642,7 @@
 			//$temp_date = strtotime( $ev['data_end'] );
 			//$date = date( 'N', $temp_date );
 			//$dayWeek = getFullPolishDayName($date);
-			$place = getPlace($conn, $ev['id_miejsce']);
+			$place = getPlace($ev['id_miejsce']);
 			
 			if($today <= $ev['data_end']){
 				if($ev['data'] != $data){
@@ -774,7 +715,7 @@
 		$result=$conn->query($query);
 		$wyj="";
 		while($row = $result->fetch_assoc()) {	
-			$p = getPlace($conn, $row['id_miejsce']);
+			$p = getPlace($row['id_miejsce']);
 			$wyj.='<li class="ui-state-default" data-id="'.$row['id'].'" data-pri="'.$row['priorytet'].'">'.$row['nazwa'].'
 			       <br>'.$row['data'].' ('.substr($row['czas'], 0, 5).') -> '.$row['data_end'].' ('.substr($row['czas_end'], 0, 5).')</li>';
 		}	
@@ -872,7 +813,7 @@
 		
 		$user = getUser($mh, $conn);
 		$e = getEvent($conn, $event);
-		$place = getPlace($conn, $e['id_miejsce']);
+		$place = getPlace($e['id_miejsce']);
 		
 		$naglowki = "Reply-to: moj@mail.pl <moj@mail.pl>".PHP_EOL;
 	    $naglowki .= "From: moj@mail.pl <moj@mail.pl>".PHP_EOL;
@@ -915,7 +856,7 @@
 			$temp_date = strtotime( $ev['data_end'] );
 			$date = date( 'N', $temp_date );
 			$dayWeek = getFullPolishDayName($date);
-			$place = getPlace($conn, $ev['id_miejsce']);
+			$place = getPlace($ev['id_miejsce']);
 			
 			if($today <= $ev['data_end']){
 				if($ev['data'] != $data){
@@ -1062,7 +1003,7 @@
 		$i = 1;
 		while($e = $result->fetch_assoc()) {
 			$kat = getCategory($conn, $e["id_kat"]);
-			$place = getPlace($conn, $e["id_miejsce"]);
+			$place = getPlace($e["id_miejsce"]);
             $link = linkToEvent($e["id"]);
 			
 			if($e['cena'] != ""){
@@ -1104,7 +1045,7 @@
 		$i = 1;
 		while($e = $result->fetch_assoc()) {
 			$kat = getCategory($conn, $e["id_kat"]);
-			$place = getPlace($conn, $e["id_miejsce"]);
+			$place = getPlace($e["id_miejsce"]);
             $link = linkToEvent($e["id"]);
 			
 			if($e['cena'] != ""){
@@ -1614,4 +1555,672 @@
 		return $result;
 	}
 	/**END KOMENTARZE**/
+	/**START PLACE_CAT**/
+	function addPlaceCat($name, $image, $thumb, $id_gallery, $comments){			
+		$conn = sqlConnect();			
+		$sql = "INSERT INTO `place_cat`(`name`, `image`, `thumb`, `id_gallery`, `comments`) VALUES ('$name', '$image', '$thumb', $id_gallery, $comments)"; 
+		$conn->query($sql);
+		$id = $conn->insert_id;
+		sqlClose($conn);
+		return $id;
+	}
+	
+	function deletePlaceCat($id){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `place_cat` WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function editPlaceCat($id, $name, $image, $thumb, $id_gallery, $comments){
+		$conn = sqlConnect();
+		$sql = "UPDATE `place_cat` SET `name`='$name',`image`='$image',`thumb`='$thumb',`id_gallery`=$id_gallery,`comments`=$comments WHERE  id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	
+	function getPlaceCat($id){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `place_cat` WHERE id = $id";
+		$result=$conn->query($query);
+		while($c = $result->fetch_assoc()) {
+			sqlClose($conn);
+			return $c;
+		}
+	}
+	
+	function getPlaceCats(){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `place_cat`";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+	
+	function getLinkToPlaceCat($name){
+		return "miejsca/".makeSlug($name);
+	}
+	/**END PLACE_CAT**/
+	/**START GALLERY**/
+	function addGallery($name){			
+		$conn = sqlConnect();			
+		$sql = "INSERT INTO `gallery`(`name`) VALUES ('$name')"; 
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function deleteGallery($id){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `gallery` WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function editGallery($id, $name){
+		$conn = sqlConnect();
+		$sql = "UPDATE `gallery` SET `name`='$name' WHERE  id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function getGallery($id){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `gallery` WHERE id = $id";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+	/**END GALLERY**/
+	/**START PHOTO**/
+	function addPhoto($id_gallery, $title, $src){			
+		$conn = sqlConnect();			
+		$sql = "INSERT INTO `photo` (`id_gallery`, `title`, `src`) VALUES ($id_gallery, '$title', '$src')"; 
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function deletePhoto($id){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `photo` WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function editPhoto($id, $id_gallery, $title, $src){
+		$conn = sqlConnect();
+		$sql = "UPDATE `photo` SET `id_gallery`=$id_gallery,`title`='$title',`src`='$src' WHERE  id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function getPhoto($id){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `photo` WHERE id = $id";
+		$result=$conn->query($query);
+		while($c = $result->fetch_assoc()) {
+			sqlClose($conn);
+			return $c;
+		}
+	}
+	
+	function getPhotoInGallery($id_gallery){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `photo` WHERE `id_gallery` = $id_gallery";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+	/**END PHOTO**/
+	/**START FILTER**/
+	function addFilter($name, $type, $id_parent, $destination){		
+		$conn = sqlConnect();			
+		$sql = "INSERT INTO `filter`(`name`, `type`, `id_parent`, `destination`) VALUES ('$name',$type,$id_parent,$destination)"; 
+		$conn->query($sql);
+		$id = $conn->insert_id;
+		sqlClose($conn);
+		return $id;
+	}
+	
+	function deleteFilter($id){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `filter` WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}	
+	
+	function deleteAllEmptyFilter(){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `filter` WHERE id_parent = -1";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+
+	function editFilter($id, $name, $type, $id_parent, $destination){
+		$conn = sqlConnect();
+		$sql = "UPDATE `filter` SET `name`='$name',`type`=$type,`id_parent`=$id_parent,`destination`=$destination WHERE  id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function setUnsignedFilterToParent($id_parent){
+		$conn = sqlConnect();
+		$sql = "UPDATE `filter` SET `id_parent`=$id_parent WHERE  id_parent = -1";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function getFiltersForParent($id_parent, $destination){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `filter` WHERE `id_parent` = $id_parent AND `destination` = $destination ORDER BY `order`";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+	
+	function getFilter($id){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `filter` WHERE `id` = $id";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+
+	/**END FILTER**/
+	/**START FILTER_FIELD**/
+	function addFilterField($name, $id_filter){		
+		$conn = sqlConnect();			
+		$sql = "INSERT INTO `filter_field`(`name`, `id_filter`) VALUES ('$name',$id_filter)"; 
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function deleteFilterField($id){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `filter_field` WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}		
+	
+	function deleteFilterFieldByParent($id){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `filter_field` WHERE id_filter = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}	
+	
+	function deleteAllEmptyFilterField(){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `filter_field` WHERE id_filter = -1";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function editFilterField($id, $name){
+		$conn = sqlConnect();
+		$sql = "UPDATE `filter_field` SET `name`='$name' WHERE  id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function addAllFilterFieldToFilter($idF){
+		$conn = sqlConnect();
+		$sql = "UPDATE `filter_field` SET `id_filter`=$idF WHERE `id_filter`=-1";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function getFiltersForFilter($id_filter){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `filter_field` WHERE `id_filter` = $id_filter";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+	
+	function getFilterField($id){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `filter_field` WHERE `id` = $id";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+	/**END FILTER FIELD**/
+	/**START RATING**/
+	function addRating($name, $id_parent, $destination){		
+		$conn = sqlConnect();			
+		$sql = "INSERT INTO `rating`(`name`, `id_parent`, `destination`) VALUES ('$name', $id_parent, $destination)"; 
+		$conn->query($sql);
+		$id = $conn->insert_id;
+		sqlClose($conn);
+		return $id;
+	}
+	
+	function deleteRating($id){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `rating` WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}	
+	
+	function deleteAllEmptyRating(){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `rating` WHERE id_parent = -1";
+		$conn->query($sql);
+		sqlClose($conn);
+	}	
+	
+	function deleteAllRatingFieldNotYetForParent($arrayIds){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `rating` WHERE id NOT IN ( '" . implode($arrayIds, "', '") . "' )";
+		$conn->query($sql);
+		sqlClose($conn);
+	}	
+	
+	function editRating($id, $name, $id_parent, $destination){
+		$conn = sqlConnect();
+		$sql = "UPDATE `rating` SET `name`='$name',`id_parent`=$id_parent,`destination`=$destination WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function setRatingToParent($id_parent, $destination){
+		$conn = sqlConnect();
+		$sql = "UPDATE `rating` SET `id_parent`=$id_parent,`destination`=$destination WHERE id_parent = -1";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function getRatingForParent($id_parent, $destination){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `rating` WHERE `id_parent` = $id_parent AND `destination`=$destination  ORDER BY `order`";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+	/**END RATING**/
+	/**START DESC_FIELD**/
+	function addDescField($name, $id_parent, $destination){		
+		$conn = sqlConnect();			
+		$sql = "INSERT INTO `desc_field`(`name`, `id_parent`, `destination`) VALUES ('$name', $id_parent, $destination)"; 
+		$conn->query($sql);
+		$id = $conn->insert_id;
+		sqlClose($conn);
+		return $id;
+	}
+	
+	function deleteDescField($id){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `desc_field` WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}	
+	
+	function deleteAllEmptyDescField(){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `desc_field` WHERE id_parent = -1";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+		
+	function deleteAllDescFieldNotYetForParent($arrayIds){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `desc_field` WHERE id NOT IN ( '" . implode($arrayIds, "', '") . "' )";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function editDescField($id, $name, $id_parent, $destination){
+		$conn = sqlConnect();
+		$sql = "UPDATE `desc_field` SET `name`='$name',`id_parent`=$id_parent,`destination`=$destination WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function getDescFieldForParent($id_parent, $destination){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `desc_field` WHERE `id_parent` = $id_parent AND `destination`=$destination AND `static` = 0 ORDER BY `order`";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+	/**END DESC_FIELD**/
+	/**START STATIC_FIELD**/
+	function addStaticField($id_field, $id_parent, $destination){		
+		$conn = sqlConnect();			
+		$sql = "INSERT INTO `static_desc_field`(`id_field`, `id_parent`, `destination`) VALUES ('$id_field', $id_parent, $destination)"; 
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function deleteStaticField($idF, $idP, $dest){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `static_desc_field` WHERE `id_field` = $idF AND `id_parent` = $idP AND `destination` = $dest";
+		$conn->query($sql);
+		sqlClose($conn);
+	}	
+	
+	function deleteAllStaticDescFieldNotYetForParent($arrayIds){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `static_desc_field` WHERE id_field NOT IN ( '" . implode($arrayIds, "', '") . "' )";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function deleteAllEmptyStaticField(){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `static_desc_field` WHERE `id_parent` = -1";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function getStaticFieldForParent($id_parent, $destination){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `static_desc_field` WHERE `id_parent` = $id_parent AND `destination`=$destination";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+	
+	function getNameForStaticField($id){
+		switch ($id) {
+			case 1:
+				$name = 'numer telefonu';
+				break;
+			case 2:
+				$name = 'adres e-mail';
+				break;
+			case 3:
+				$name = 'strona www';
+				break;
+			case 4:
+				$name = 'godziny otwarcia';
+				break;
+		}
+		return $name;
+	}
+	/**END STATIC_FIELD**/
+	
+	/*START PLACES*/
+	function addNewPlace($name, $id_kat, $opis, $x, $y, $adress, $img, $thumb, $id_gallery, $id_owner){		
+		$conn = sqlConnect();			
+		$sql = "INSERT INTO `miejsce`(`nazwa`, `id_kat`, `opis`, `x`, `y`, `adres`, `img`, `thumb`, `id_gallery`, `id_owner`) VALUES ('$name', $id_kat, '$opis', $x, $y, '$adress', '$img', '$thumb', $id_gallery, $id_owner)"; 
+		$conn->query($sql);
+		$id = $conn->insert_id;
+		sqlClose($conn);
+		return $id;
+	}
+	
+	function deletePlace($id){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `miejsce` WHERE `id` = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}	 
+	
+	function editPlace($id, $name, $id_kat, $opis, $x, $y, $adress, $img, $thumb, $id_gallery){
+		$conn = sqlConnect();
+		$sql = "UPDATE `miejsce` SET `nazwa`='$name',`id_kat`=$id_kat,`opis`='$opis',`x`=$x,`y`=$y,`adres`='$adress',`img`='$img',`thumb`='$thumb',`id_gallery`=$id_gallery,`active`= 0 WHERE `id` = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function activatePlace($id){
+		$conn = sqlConnect();
+		$sql = "UPDATE `miejsce` SET `active`=1 WHERE `id` = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function getPlacesFromCat($id_cat){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `miejsce` WHERE `id_kat`=$id_cat";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+	
+	function getAllPlaces(){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `miejsce`";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+	
+	function isPlaceOwner($idP, $idU){
+		$place = getPlace($idP);
+		return $idP['id_owner'] == $idU;
+	}
+	
+	function getPlace($id){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `miejsce` WHERE `id` = ".$id."";
+		$result=$conn->query($query);
+		while($row = $result->fetch_assoc()) {		
+			sqlClose($conn);
+			return $row;
+		}
+	}
+	
+	function addPlaceDB($con, $name, $id_kat, $opis, $x, $y, $adress){
+		$sql = "INSERT INTO `miejsce`(`nazwa`, `id_kat`, `opis`, `x`, `y`, `adres`) VALUES ('".$name."',".$id_kat.",'".$opis."',".$x.",".$y.",'".$adress."')"; 
+		$con->query($sql);	
+	}
+	
+	function getPlaceFirstLetter($con)
+	{	
+		$wyj = "";
+		for($i = 65; $i < 91; $i++)
+		{
+			if($i%2 == 1) {$wyj.="<tr class='letterTR'>\n";}
+			$wyj.='<td class="letter"><table>
+							<tr><th>'.chr($i).'</th></tr>';
+			$sql = "SELECT * FROM `miejsce` WHERE `nazwa` LIKE '".chr($i)."%'"; 
+			$result=$con->query($sql);
+			while($row = $result->fetch_assoc()) {				
+				$wyj .= '<tr><td><a class="set_place" data-id="'.$row["id"].'">'.$row["nazwa"].'</a></td></tr>';					
+			}
+			$wyj .= '</table></td>';
+			if($i%2 == 0) {$wyj.="</tr>";} 
+		}	
+		return $wyj;
+	}
+	
+	function getPlaceFirstLetterForLittlePanel($con)
+	{	
+		$wyj = "";
+		for($i = 65; $i < 91; $i++)
+		{
+			$wyj.='<tr><th>'.chr($i).'</th></tr>';
+			$sql = "SELECT * FROM `miejsce` WHERE `nazwa` LIKE '".chr($i)."%'"; 
+			$result=$con->query($sql);
+			while($row = $result->fetch_assoc()) {				
+				$wyj .= '<tr><td><a class="set_place" data-id="'.$row["id"].'">'.$row["nazwa"].'<a/></td></tr>';					
+			}
+		}	
+		return $wyj;
+	}
+	
+	function placesAsSelectWithSelected($conn, $id){
+		$query="SELECT * FROM `miejsce`";
+		$result=$conn->query($query);
+		$wyj="";
+		while($row = $result->fetch_assoc()) {
+			if($row["id"] == $id) $s = "selected";
+			else $s = "";
+			$wyj .= '<option value="'.$row["id"].'" '.$s.' data-x="'.$row["x"].'" data-y="'.$row["y"].'">'.$row["nazwa"].'</option>';			
+		}
+		return $wyj;
+	}
+	/*END PLACES*/
+	
+	/**START DESC_FIELD_VAL**/
+	function addDescFieldVal($id_field, $type_field, $value, $id_parent, $destination){		
+		$conn = sqlConnect();		
+		$sql = "INSERT INTO `desc_field_val`(`id_field`, `type_field`, `value`, `id_parent`, `destination`) VALUES ($id_field, $type_field, '$value', $id_parent, $destination)"; 
+		$conn->query($sql);
+		$id = $conn->insert_id;
+		sqlClose($conn);
+		return $id;
+	}
+	
+	function deleteDescFieldVal($id){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `desc_field_val` WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}	
+	
+	function editDescFieldVal($id, $value){
+		$conn = sqlConnect();
+		$sql = "UPDATE `desc_field_val` SET `value`='$value' WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function getDescFieldVal($id_field, $type_field, $id_parent, $destination){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `desc_field_val` WHERE `id_field` = $id_field AND `type_field` = $type_field AND `id_parent` = $id_parent AND `destination` = $destination ";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+	/**END DESC_FIELD**/
+	
+	/**START FILTER_FIELD**/
+	function addFilterFieldVal($id_field, $value, $id_parent, $destination){		
+		$conn = sqlConnect();			
+		$sql = "INSERT INTO `filter_field_val`(`id_field`, `value`, `id_parent`, `destination`) VALUES ($id_field, '$value', $id_parent, $destination)"; 
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function deleteFilterFieldVal($id){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `filter_field_val` WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function deleteAllFieldValForFilterWithoutThis($id_field, $id_parent, $destination){
+		$conn = sqlConnect();
+		$idFilterParent = getFilterField($id_field)['id_filter'];
+		$brotherFields = getFiltersForFilter($idFilterParent);
+		foreach($brotherFields as $f){
+			$idF = $f['id'];
+			if($idF != $id_field){
+				$sql = "DELETE FROM `filter_field_val` WHERE `id_field` = $idF AND `id_parent` = $id_parent AND `destination` = $destination";
+				$conn->query($sql);
+			}
+		}
+		sqlClose($conn);
+	}
+	
+	function deleteAllFieldValForFilterWithThis($id_field, $id_parent, $destination){
+		$conn = sqlConnect();
+		$idFilterParent = getFilterField($id_field)['id_filter'];
+		$brotherFields = getFiltersForFilter($idFilterParent);
+		foreach($brotherFields as $f){
+			$idF = $f['id'];
+			$sql = "DELETE FROM `filter_field_val` WHERE `id_field` = $idF AND `id_parent` = $id_parent AND `destination` = $destination";
+			$conn->query($sql);
+		}
+		sqlClose($conn);
+	}		
+	
+	function editFilterFieldVal($id, $value){
+		$conn = sqlConnect();
+		$sql = "UPDATE `filter_field_val` SET `value`='$value' WHERE  id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function getFilterFieldVal($id_field, $id_parent, $destination){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `filter_field_val` WHERE `id_field` = $id_field AND `id_parent` = $id_parent AND `destination` = $destination";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+	/**END FILTER FIELD**/
+	
+	function getNextIdForTable($tableName){
+		$conn = sqlConnect();
+		$query="SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE TABLE_NAME = '$tableName'";
+		$result=$conn->query($query);
+		$wyj = 0;
+		while($c = $result->fetch_assoc()) {
+			$wyj = $c['AUTO_INCREMENT'];
+		}
+		sqlClose($conn);
+		return $wyj; 
+	}
+	
+	function setOrder($table, $idsArray){
+		$conn = sqlConnect();
+		$i = 1;
+		foreach($idsArray as $id){
+			$sql = "UPDATE `".$table."` SET `order` = $i WHERE  id = $id";
+			$conn->query($sql);
+			$i++;
+		}
+		sqlClose($conn);
+	}
 ?>

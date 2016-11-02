@@ -24,7 +24,7 @@
 		foreach ($eventList as $e)
 		{
 			$kat = getCategory($conn, $e["id_kat"]);
-			$place = getPlace($conn, $e["id_miejsce"]);
+			$place = getPlace($e["id_miejsce"]);
             $link = linkToEvent($e["id"]);
 			$fblink = "";
 			

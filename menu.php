@@ -22,7 +22,7 @@
 			<ul id="u_menu">
 				<li><a href="index.php#event_calendar">KALENDARZ</a></li>
 				<li><a href="mapa.php">MAPA</a></li>
-				<li><a href="#">MIEJSCA</a></li>
+				<li><a href="miejsca.php">MIEJSCA</a></li>
 			</ul>
 		</div>
 		<div id="panel">
@@ -54,7 +54,7 @@
 			<ul id="u_menu_fix">
 				<li onclick="index.php#event_calendar"><a>KALENDARZ</a></li>
 				<li><a href="mapa.php">MAPA</a></li>
-				<li><a href="#">MIEJSCA</a></li>
+				<li><a href="miejsca.php">MIEJSCA</a></li>
 			</ul>
 		</div>
 		<div id="panel_fix">
@@ -85,7 +85,7 @@
 	<table>
 		<tr><td onclick="doKalendarza();"><a>KALENDARZ</a></td></tr>
 		<tr><td><a href="mapa.php">MAPA</a></td></tr>
-		<tr><td><a href="#">MIEJSCA</a></td></tr>
+		<tr><td><a href="miejsca.phps">MIEJSCA</a></td></tr>
 		<tr><td><a href="addevent_1.php">DODAJ WYDARZENIE</a></td></tr>
 		<?php
 			if($zalogowany == 1)
