@@ -51,7 +51,7 @@
 <!doctype html>
 <html>
 	<head>
-		<base href="/cowkaliszu/" />
+		<base href="/cowkaliszu/"/>
 		<meta charset="UTF-8">
 		<meta name="description" content="Znajdź interesujące Cię wydarzenia w Kaliszu i dodawaj do ulubionych. Sprawdź miejsca spotkań. Wiem co.wkaliszu.pl - rozrywka, film, turystyka, koncerty, muzyka, sztuka, dla dzieci, sport, teatr i inne.">
         <meta name="keywords" content="wydarzenia w Kaliszu, Kalisz, koncerty, filmy, kino, kino Helios, kino Cinema 3D, teatr, teatr im. Bogusławskiego, rozrywka">

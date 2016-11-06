@@ -1478,7 +1478,9 @@
 		$conn = sqlConnect();			
 		$sql = "INSERT INTO `comments` (`type`, `id_user`, `id_item`, `content`) VALUES ($type , $id_user , $id_item , '$content')"; 
 		$conn->query($sql);
+		$id = $conn->insert_id;
 		sqlClose($conn);
+		return $id;
 	}
 	
 	function getCommentForEvent($id){
@@ -1535,6 +1537,72 @@
 		sqlClose($conn);
 	}
 	
+	function getCommentForPlace($id){
+		$conn = sqlConnect();
+		if(isset($_COOKIE['stmh'])){
+			$mh = $_COOKIE['stmh'];
+			$loggedUser = getUser($mh, $conn);
+			if( getPermission($mh, $conn) == 1 || getPermission($mh, $conn) == 2){
+				$admin = true;
+			}else{
+				$admin = false;
+			}
+		}else{
+			$admin = false;
+		}
+		
+		if($loggedUser['id']) $loggedUserID = $loggedUser['id'];
+		else $loggedUserID = -2;
+		
+		$query="SELECT * FROM `comments` WHERE `id_item` = $id AND `type` = 2 ORDER BY `id` DESC";
+		$result=$conn->query($query);
+		$wyj="";
+		while($c = $result->fetch_assoc()) {
+			if($c['id_user'] == -1){
+				$user = [ "avatar" => "img/bigavatar.png", "login" => "Anonim" ];
+				$owner = false;
+			}else{
+				$user = getUserByID($c['id_user'], $conn);
+				$owner = ($user['id'] == $loggedUserID);
+			}
+			$wyj .= '<div class="ev-comment">
+							<div class="avatar-comment">
+								<img src="img/bigavatar.png" alt="'.$user['login'].'">
+							</div>
+							<div class="comment-content">';
+			if($owner || $admin){
+				$wyj .= '<div class="option-btns">';
+				if($admin)	$wyj .= '<button class="edit-btn" onclick="editComment(this);">edytuj</button>';
+					$wyj .= '<button class="delete-btn" onclick="deleteComment('.$c['id'].');">usuń</button>
+				</div>';
+			}
+					$wyj .= '<h5>'.$user['login'].'</h5>
+					<p>'.$c['content'].'</p>';
+					
+			if($admin) $wyj .= '<div class="editComment-panel"><form class="editComment">
+									<textarea class="edit-comment-field" name="content" placeholder="Napisz komentarz...">'.$c['content'].'</textarea>
+									<input type="hidden" name="id" value="'.$c['id'].'">
+								</form>
+								<button class="accept-btn" onclick="acceptEditComment(this);">zapisz</button></div>';
+				$wyj .= '</div>
+			</div>';
+		}
+		return $wyj;
+		sqlClose($conn);
+	}
+	
+	function getCommentsForPlaceInArray($id){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `comments` WHERE `id_item` = $id AND `type` = 2";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		return $res;
+		sqlClose($conn);
+	}
+	
 	function getComment($id){
 		$conn = sqlConnect();
 		$query="SELECT * FROM `comments` WHERE `id` = $id";
@@ -1579,7 +1647,6 @@
 		sqlClose($conn);
 	}
 	
-	
 	function getPlaceCat($id){
 		$conn = sqlConnect();
 		$query="SELECT * FROM `place_cat` WHERE id = $id";
@@ -1587,6 +1654,18 @@
 		while($c = $result->fetch_assoc()) {
 			sqlClose($conn);
 			return $c;
+		}
+	}
+	
+	function getPlaceCatBySlug($slug){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `place_cat`";
+		$result=$conn->query($query);
+		while($c = $result->fetch_assoc()) {
+			if($slug == makeSlug($c['name'])){
+				sqlClose($conn);
+				return $c;
+			}
 		}
 	}
 	
@@ -1603,7 +1682,7 @@
 	}
 	
 	function getLinkToPlaceCat($name){
-		return "miejsca/".makeSlug($name);
+		return "miejsca/".makeSlug($name).".html";
 	}
 	/**END PLACE_CAT**/
 	/**START GALLERY**/
@@ -1746,6 +1825,25 @@
 		return $res;
 	}
 
+	function getFiltersForParentToFilter($id_parent, $destination, $filterFields){
+		$wyj = "";
+		$filters = getFiltersForParent($id_parent, $destination);
+		foreach($filters as $f){
+			$wyj .= '<div class="filter">';
+			$wyj .= '<p>'.$f['name'].'</p>';
+			$wyj .= '<ul data-id="'.$f['id'].'" data-type="'.$f['type'].'" data-slug="'.makeSlugForFilterField($f['name']).'" class="cat-list ';
+			$wyj .= '">';
+			$ffields = getFiltersForFilter($f['id']);
+			foreach($ffields as $ff){
+					$slu = makeSlugForFilterField($ff["name"]);
+					$class = "activ-option";
+					$wyj .= '<li data-id="'.$ff["id"].'" data-slu="'.$slu.'" class="'.$class.'">'.$ff["name"].'</li>';				
+			}
+			$wyj .= '</ul>';
+			$wyj .= '</div>';
+		}
+		return $wyj;
+	}
 	/**END FILTER**/
 	/**START FILTER_FIELD**/
 	function addFilterField($name, $id_filter){		
@@ -1871,6 +1969,93 @@
 		return $res;
 	}
 	/**END RATING**/
+	
+	/**START RATING_VAL**/
+	function addRatingVal($id_rating, $value, $id_comment, $id_user){		
+		$conn = sqlConnect();			
+		$sql = "INSERT INTO `rating_val`(`id_rating`, `value`, `id_comment`, `id_user`) VALUES ($id_rating, $value, $id_comment, $id_user)"; 
+		$conn->query($sql);
+		$id = $conn->insert_id;
+		sqlClose($conn);
+		return $id;
+	}
+	
+	function deleteRatingVal($id){
+		$conn = sqlConnect();
+		$sql = "DELETE FROM `rating_val` WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}	
+
+	function editRatingVal($id, $value){
+		$conn = sqlConnect();
+		$sql = "UPDATE `rating_val` SET `value`=$value WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function getRatingValForComment($id_comment){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `rating_val` WHERE `id_comment` = $id_comment";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+	
+	function getRatingValForRatingAndComment($id_rating, $id_comment){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `rating_val` WHERE `id_rating` = $id_rating AND `id_comment` = $id_comment";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+	
+	function getRatingValAvgForPlace($id_place){
+		$place = getPlace($id_place);
+		$comments = getCommentsForPlaceInArray($id_place);
+		$id_cat = $place['id_kat'];
+		$ratings = getRatingForParent($id_cat, 1);
+		$results = [];
+		$globalsum = 0;
+		$globalcount = 0;
+		foreach($ratings as $r){
+			$results[] = $r['id'];
+			$sum = 0;
+			$count = 0;
+			foreach($comments as $c){
+				$vote = getRatingValForRatingAndComment($r['id'], $c['id']);
+				if(count($vote) > 0){
+					$count++;
+					$sum += $vote[0]['value'];
+					$globalcount++;
+					$globalsum += $vote[0]['value'];
+				}
+			}
+			if($count > 0) $results[] = $sum/$count;
+			else $results[] = 0; //nieocenione jeszcze
+		}
+		$results[] = -1;
+		if($globalcount > 0) $results[] = $globalsum/$globalcount;
+		else $results[] = 0; //nieocenione jeszcze
+		return $results;
+	}
+	
+	function getGlobalRatingValAvgForPlace($id_place){
+		$ratings = getRatingValAvgForPlace($id_place);
+		for($i = 0; $i < count($ratings); $i++){
+			if($ratings[$i] == -1) return $ratings[$i+1];
+		}
+		return 0;
+	}
+	/**END RATING_VAL**/
 	/**START DESC_FIELD**/
 	function addDescField($name, $id_parent, $destination){		
 		$conn = sqlConnect();			
@@ -2051,6 +2236,18 @@
 		}
 	}
 	
+	function getPlaceBySlug($slug){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `miejsce";
+		$result=$conn->query($query);
+		while($row = $result->fetch_assoc()) {		
+			if($slug == makeSlug($row['name'])){
+				sqlClose($conn);
+				return $row;
+			}			
+		}
+	}
+	
 	function addPlaceDB($con, $name, $id_kat, $opis, $x, $y, $adress){
 		$sql = "INSERT INTO `miejsce`(`nazwa`, `id_kat`, `opis`, `x`, `y`, `adres`) VALUES ('".$name."',".$id_kat.",'".$opis."',".$x.",".$y.",'".$adress."')"; 
 		$con->query($sql);	
@@ -2100,6 +2297,10 @@
 			$wyj .= '<option value="'.$row["id"].'" '.$s.' data-x="'.$row["x"].'" data-y="'.$row["y"].'">'.$row["nazwa"].'</option>';			
 		}
 		return $wyj;
+	}
+	
+	function getLinkToPlace($id, $name){
+		return "miejsce/".$id.'-'.makeSlug($name).".html";
 	}
 	/*END PLACES*/
 	

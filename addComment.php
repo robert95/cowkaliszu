@@ -12,7 +12,7 @@
 		$userID = $user['id'];
 	}
 	
-	addComment(addslashes($_GET['type']), $userID, addslashes($_GET['id_item']), addslashes($_GET['content']));
-	
+	$idComment = addComment(addslashes($_GET['type']), $userID, addslashes($_GET['id_item']), addslashes($_GET['content']));
+	echo $idComment;
 	sqlClose($conn);
 ?>
