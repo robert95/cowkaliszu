@@ -1,0 +1,150 @@
+.place-cat-cont .thumb img{
+	width: 100%;
+}
+.place-cat-cont p{
+	background: #00b0b5;
+	padding: 3px 10px;
+	font-size: 25px;
+	position: relative;
+	top: -20px;
+}
+.place-cat-cont p:hover, .place-cat-cont p:hover a{ 
+	background: white;
+	color: #00b0b5 !important;
+}
+.place-cat-cont p a{
+	display: block;
+}
+.place-cat-cont p a:hover{
+	color: #00b0b5;
+	text-decoration: none;
+}
+.place-cat-cont {
+	padding: 5px;
+}
+.place-cat-cont .admin-btns{
+	margin-top: -20px;
+    margin-bottom: 20px;
+}
+#place-main-container #id_kat{
+	height: 31px;
+	margin: 7px auto;
+	width: 282px;
+	font-size: 20px;
+	padding: 0px 10px;
+}
+.place-page-container .place-name, .place-page-container .place-name input{
+	font-size: 30px !important;
+	height: auto !important;
+	margin: 0 !important;
+}
+.place-page-container .place-adress, .place-page-container .place-adress input{
+	font-size: 17px;
+	height: auto;
+	margin: 0;
+}
+.place-page-container #place_desc{
+	font-size: 18px;
+	font-family: inherit;
+	width: calc(65% - 16px);
+	resize: none;
+	height: 250px;
+	padding: 10px 8px;
+}
+.place-page-container .desc-field input{
+	font-size: 16px !important;
+	height: 20px !important;
+}
+.place-page-container #place-filters p{
+	font-size: 20px;
+    border-bottom: 1px solid #b0b0b0;
+    padding-bottom: 9px;
+    margin: 20px 0 10px 0;
+}
+.place-page-container #place-filters{
+    margin: 70px 0;
+}
+.place-page-container #place-filters label{
+	width: 20%;
+	display: inline-block;
+	font-size: 20px;
+	color: black;
+	cursor: pointer;
+}
+.place-page-container #place-filters label input{
+	vertical-align: top;
+}
+.place-page-container .place-hours-edit input{
+	width: 40px;
+	font-size: 12px !important;
+}
+.place-page-container .place-hours-edit span{
+	display: inline-block;
+	min-width: 30px;
+	font-size: 12px !important;
+}
+.place-page-container .place-hours-edit{
+	position: absolute;
+	top: 10px;
+	right: 10px;
+}
+.show-place-page #main_picture{
+	display: block !important;
+}
+.show-place-page #place_name{
+	font-size: 30px !important;
+	color: #1d1d1b !important;
+}
+.show-place-page #place_adress{
+	color: #a3a5a8 !important;
+	margin-bottom: 10px !important;
+	font-size: 16px !important;
+}
+.show-place-page #place-show-open-hours{
+	color: #a3a5a8 !important;
+	font-size: 16px !important;
+}
+.show-place-page .desc-field{
+	color: black !important;
+	font-size: 16px !important;
+}
+.show-place-page .desc-field span{
+	font-size: 16px !important;
+	top: 0 !important;
+	display: block;
+	margin-bottom: 11px !important;
+	margin-top: 1px !important;
+	color: #a3a5a8 !important;
+}
+.show-place-page #main_event_desc p{
+	font-size: 18px !important;
+	color: #1d1d1b !important;
+	width: 65%;
+	text-align: justify;
+}
+.show-place-page  #place-filters p{
+	font-size: 21px;
+	border-bottom: 0px;
+	margin: 8px 0;
+	color: #00b0b5;
+}
+.show-place-page  #place-filters p span{
+	font-size: 19px;
+	color: #1d1d1b;
+}
+.show-place-page  #place-filters {
+	margin: 20px 0;
+}
+.show-place-page  #average-rating {
+	font-size: 25px;
+	color: #231f20;
+	position: absolute;
+	top: 10px;
+	right: 15px;
+}
+.show-place-page  #average-rating span{
+	font-size: 30px;
+	color: #00b0b5;
+	top: 0;
+	vertical-align: bottom;
+}
