@@ -1,6 +1,5 @@
 $( document ).ready(function(e) {
 	$("#imgWidth").val($(".mainevent_img_on_eventpage").width());
-	startSortabaleField();
 	if($("#main_picture").attr('src')){
 		$("#main_picture").show();
 		$("#add-main-imange-icon").hide();
@@ -72,6 +71,7 @@ function removeMe(o){
 }
 
 function resizeImg(input){
+	$(".full-loading-panel").show();
 	if (input.files && input.files[0]) {
 		var img = document.createElement("img");
 		var reader = new FileReader();
@@ -109,10 +109,20 @@ function resizeImg(input){
 				$('#img').val(dataurl); 
 				$('#main_picture').show();
 				$("#add-main-imange-icon").hide();
-				$('#main_picture').attr('src', dataurl);  
-				$("#X").val(0);
-				$("#Y").val(0);
-				$("#W").val(100);
+				$('#main_picture').attr('src', dataurl); 
+				setTimeout(function(){
+					if($('#main_picture').width() > $('#main_picture').height()){
+						var x = parseInt((650 - $('#main_picture').height())/2);
+						$("#X").val(x);
+						$("#Y").val(0);
+					}else{
+						var y = parseInt(($('#main_picture').height() - 650)/2);
+						$("#X").val(0);
+						$("#Y").val(y);
+					}
+					$(".full-loading-panel").hide();
+				}, 200);
+				$("#W").val(1000);
 			}, 500);
 		}
 		reader.readAsDataURL(input.files[0]);
@@ -128,10 +138,9 @@ function startDoThumb(x, y, wa){
 		  onChange: updateThumb,
 		  onSelect: updateThumb,
 		  aspectRatio: 1,
-		  minSize: [ 20, 20 ],
+		  minSize: [ 50, 50 ],
 		  setSelect:   [ x, y, x+w, y+w ],
 		},function(){
-		console.log(w);
 			jcrop = this;
 		});
 		
@@ -164,6 +173,6 @@ function updateThumb(c){
 	if($("#W").val() == 0){
 		$("#X").val(0);
 		$("#Y").val(0);
-		$("#W").val(100);
+		$("#W").val(1000);
 	}
 };

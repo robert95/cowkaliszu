@@ -37,6 +37,10 @@
 		$y = $place['y'];
 		$descfields = getDescFieldForParent($id_kat , 1);
 		$descStaticfields = getStaticFieldForParent($id_kat , 1);
+		
+		if($image == ""){
+			$image = $cat['image'];
+		}
 	}	
 ?>
 <!doctype html>
@@ -64,7 +68,7 @@
 		<div id="top" class="place-page-container show-place-page">			
 			<section id="container">
 				<section id="top_events">	
-					<a class="btn" href="edytuj-miejsce.php?id=<?php echo $id;?>">Edytuj miejsce</a><br><br>
+					<br><br><a class="btn" href="edytuj-miejsce.php?id=<?php echo $id;?>">Edytuj miejsce</a><br><br>
 					<input type="hidden" name="id" id="place_id" value="<?php echo $id; ?>">
 					<h1 id="event_id" data-id="<?php echo $id; ?>"><a href="/">co.wkaliszu.pl</a> > <a href="/miejsca.php">miejsca</a> > <a href="/miejsca.php"><?php echo $cat['name']; ?></a> > <?php echo $name; ?></h1>
 					<div id="event_right">
@@ -98,17 +102,23 @@
 													$val = json_decode($val);
 												}else{
 													$val = ["","","","","","","","","","","","","",""];
-												}												
-												echo '<p class="desc-field">'.$name.':';
+												}										
+												echo '<div id="place-desc-hours-time"><p class="desc-field">Godziny otwarcia:</p>';
 												echo '<table id="place-show-open-hours">';
-												echo '<tr><td>Poniedziałek</td><td>'.$val[0].' - '.$val[1].'</td></tr>';
-												echo '<tr><td>Wtorek</td><td>'.$val[2].' - '.$val[3].'</td></tr>';
-												echo '<tr><td>Środa</td><td>'.$val[4].' - '.$val[5].'</td></tr>';
-												echo '<tr><td>Czwartek</td><td>'.$val[6].' - '.$val[7].'</td></tr>';
-												echo '<tr><td>Piątek</td><td>'.$val[8].' - '.$val[9].'</td></tr>';
-												echo '<tr><td>Sobota</td><td>'.$val[10].' - '.$val[11].'</td></tr>';
-												echo '<tr><td>Niedziela</td><td>'.$val[12].' - '.$val[13].'</td></tr>';
-												echo '</table></p>';
+												if($val[0] != "" && $val[1] != "") echo '<tr><td>Pon:</td><td>'.$val[0].' - '.$val[1].'</td></tr>';
+												if($val[2] != "" && $val[3] != "") echo '<tr><td>Wt:</td><td>'.$val[2].' - '.$val[3].'</td></tr>';
+												if($val[4] != "" && $val[5] != "") echo '<tr><td>Śr:</td><td>'.$val[4].' - '.$val[5].'</td></tr>';
+												if($val[6] != "" && $val[7] != "") echo '<tr><td>Cz;</td><td>'.$val[6].' - '.$val[7].'</td></tr>';
+												if($val[8] != "" && $val[9] != "") echo '<tr><td>Pt:</td><td>'.$val[8].' - '.$val[9].'</td></tr>';
+												if($val[10] != "" && $val[11] != "") echo '<tr><td>Sob:</td><td>'.$val[10].' - '.$val[11].'</td></tr>';
+												if($val[12] != "" && $val[13] != "") echo '<tr><td>Ndz:</td><td>'.$val[12].' - '.$val[13].'</td></tr>';
+												echo '</table></div>';
+											}else if($name == "numer telefonu" || $name == "adres e-mail"){
+												echo '<p class="desc-field">'.$name.': 
+													<span class="show-contact">Pokaż '.$name.'</span><span class="hidden-contact">
+													'.$val.'
+													</span>
+												</p>';
 											}else{
 												echo '<p class="desc-field">'.$name.': <span>'.$val.'</span></p>';
 											}
@@ -125,36 +135,49 @@
 								</div>
 							</div>
 						</div>
-					</div>
-					<div id="rating-result-container">
-						<p class="main-average">Średnia ocen: <span><?php echo number_format((float)getGlobalRatingValAvgForPlace($id), 2, ',', '');?></span></p>
-						<?php 
-							$ratingsAvg = getRatingValAvgForPlace($id);
-							foreach( getRatingForParent( $id_kat , 1) as $rating){
-								echo '<p>'.$rating['name'].' <span>';
-								for($i = 0; $i < count($ratingsAvg); $i++){
-									if($ratingsAvg[$i] == $rating['id']){
-										echo '<span class="r-s-'.round($ratingsAvg[$i+1]).'">
-											<img src="img/active_star.png" alt="1" class="a-s-1">
-											<img src="img/star.png" alt="1" class="n-s-1">
-											<img src="img/active_star.png" alt="1" class="a-s-2">
-											<img src="img/star.png" alt="1" class="n-s-2">
-											<img src="img/active_star.png" alt="1" class="a-s-3">
-											<img src="img/star.png" alt="1" class="n-s-3">
-											<img src="img/active_star.png" alt="1" class="a-s-4">
-											<img src="img/star.png" alt="1" class="n-s-4">
-											<img src="img/active_star.png" alt="1" class="a-s-5">
-											<img src="img/star.png" alt="1" class="n-s-5">
-										</span>';
-										echo ' ('.number_format((float)$ratingsAvg[$i+1], 2, ',', '').')';
+						<div id="rating-result-container">
+							<p class="main-average">Średnia ocen: 
+								<span>
+									<?php echo number_format((float)getGlobalRatingValAvgForPlace($id), 2, ',', '');?>
+								</span>
+								<span class="rate-this-place">oceń miejsce</span>
+							</p>
+							<div id="rating-details">
+								<table>
+								<?php 
+									$ratingsAvg = getRatingValAvgForPlace($id);
+									foreach( getRatingForParent( $id_kat , 1) as $rating){
+										echo '<tr><td>'.$rating['name'].': </td>';
+										for($i = 0; $i < count($ratingsAvg); $i+=2){
+											if($ratingsAvg[$i] == $rating['id']){
+												echo '<td><span class="r-s-'.round($ratingsAvg[$i+1]).'">
+													<img src="img/active_star.png" alt="1" class="a-s-1">
+													<img src="img/star.png" alt="1" class="n-s-1">
+													<img src="img/active_star.png" alt="1" class="a-s-2">
+													<img src="img/star.png" alt="1" class="n-s-2">
+													<img src="img/active_star.png" alt="1" class="a-s-3">
+													<img src="img/star.png" alt="1" class="n-s-3">
+													<img src="img/active_star.png" alt="1" class="a-s-4">
+													<img src="img/star.png" alt="1" class="n-s-4">
+													<img src="img/active_star.png" alt="1" class="a-s-5">
+													<img src="img/star.png" alt="1" class="n-s-5">
+												</td>';
+												//echo ' ('.number_format((float)$ratingsAvg[$i+1], 2, ',', '').')';
+											}
+										}
+										echo '</tr>';
 									}
-								}
-								echo '</span></p>';
-							}
-						?>
+								?>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div id="add-event-in-place">
+						<a class="btn" href="addevent_1.php"><img src="img/add.png" alt="Dodaj wydarzenie">Dodaj wydarzenie w tym miejscu</a><br><br>
 					</div>
 					<div id="main_event_desc">
 						<p><?php echo $desc;?></p>
+						<p class="place-created-by">Dodano przez admin</p>
 					</div>
 					<div id="place-filters">
 						<?php
@@ -182,28 +205,31 @@
 						</div>
 						<div class="add-comment-form">
 							<form id="addNewComment">
+								<?php if($idU < 0){
+									echo '<input name="author" placeholder="Anonim" class="author-comment">';
+								}?>
 								<textarea name="content" placeholder="Napisz komentarz..."></textarea>
 								<input type="hidden" name="type" value="2">
 								<input type="hidden" name="id_item" id="id_item" value="<?php echo $id; ?>">
 							</form>
-							<div class="rating-panel">
-								<p>Dodaj ocenę</p>
+							<div class="rating-panel add-my-rate" >
+								<p>Dodaj ocenę:</p>
 								<table>
 								<?php 
 									foreach( getRatingForParent( $id_kat , 1) as $rating){
 										echo '<tr>
-										<td>'.$rating['name'].'</td>
+										<td>'.$rating['name'].': </td>
 										<td class="rating-stars r-s-3" data-val="3" data-id="'.$rating['id'].'">
-											<img src="img/active_star.png" alt="1" data-val="1" class="a-s-1">
 											<img src="img/star.png" alt="1" data-val="1" class="n-s-1">
-											<img src="img/active_star.png" alt="1" data-val="2" class="a-s-2">
+											<img src="img/active_star.png" alt="1" data-val="1" class="a-s-1">
 											<img src="img/star.png" alt="1" data-val="2" class="n-s-2">
-											<img src="img/active_star.png" alt="1" data-val="3" class="a-s-3">
+											<img src="img/active_star.png" alt="1" data-val="2" class="a-s-2">
 											<img src="img/star.png" alt="1" data-val="3" class="n-s-3">
-											<img src="img/active_star.png" alt="1" data-val="4" class="a-s-4">
+											<img src="img/active_star.png" alt="1" data-val="3" class="a-s-3">
 											<img src="img/star.png" alt="1" data-val="4" class="n-s-4">
-											<img src="img/active_star.png" alt="1" data-val="5" class="a-s-5">
+											<img src="img/active_star.png" alt="1" data-val="4" class="a-s-4">
 											<img src="img/star.png" alt="1" data-val="5" class="n-s-5">
+											<img src="img/active_star.png" alt="1" data-val="5" class="a-s-5">
 										</td>
 									</tr>';
 									}
@@ -213,8 +239,14 @@
 							<button id="addComment" onclick="add_comment();">Dodaj</button>
 						</div>
 					</div>
-					<div class="comments-list">
-						<?php echo getCommentForPlace($id); ?>
+					<div class="comment-cont">
+						<div class="comments-list">
+							<?php echo getCommentForPlace($id); ?>
+						</div>
+						<p class="show-more" onclick="showMoreComments();">pokaż więcej komentarzy</p>
+						<div class="loading-panel full-loading-panel">
+							<img src="img/loading.gif" alt="Ładowanie">
+						</div>
 					</div>
 				</section>
 			</section>
@@ -235,6 +267,19 @@
 		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 		<script type="text/javascript" src="js/place-page-scripts.js"></script>
         <script type="text/javascript" src="js/skrypt_comment_place.js"></script>
-		<?php if($per >=1 ) echo '<script type="text/javascript" src="js/skrypt_editcomment.js"></script>';?>
+        <?php if($per >=1 ) echo '<script type="text/javascript" src="js/skrypt_editcomment.js"></script>';?>
+		<script>
+			$(".show-contact").click(function() {
+				$(this).hide();
+				$(this).next('span').css('display', 'block');
+			});
+			$(".rate-this-place").click(function() {
+				$('html, body').animate({
+					scrollTop: $(".add-comment-form").offset().top - 200
+				}, 500);
+			});
+		</script>
+		<script>
+		</script>
 	</body>
 </html>	

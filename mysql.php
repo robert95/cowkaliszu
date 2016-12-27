@@ -341,6 +341,14 @@
 		$con->query($sql);
 	}
 	
+	function newEditEvent($id, $name, $id_kat, $thumb, $image, $data, $time, $data_end, $time_end, $desc, $id_place, $www, $yt, $price){
+		$conn = sqlConnect();
+		$sql = "UPDATE `wydarzenia` SET `nazwa`='".$name."',`id_kat`=".$id_kat.",`miniatura`='".$thumb."',`obraz`='".$image."',`data`='".$data."',`czas`='".$time."',`data_end`='".$data_end."',`czas_end`='".$time_end."',`opis`='".$desc."',`id_miejsce`=".$id_place.", `poczekalnia` = 1 ,`www`='".$www."',`yt`='".$yt."',`cena`='".$price."' WHERE `id` = ".$id."";
+		$conn->query($sql);
+		sqlClose($conn);
+		return $id;
+	}
+	
 	function getPopularEvent($conn, $cat = 0)
 	{
 		if($cat == 0 ){
@@ -985,6 +993,10 @@
 		return "event-$id-$nazwa.html";
 	}
 	
+	function linkToEventEdition($id){
+		return 'add_event.php?id='.$id;
+	}
+	
 	function notPolishLink($url){
 		$url = substr($url, 0, 80);
 		$aWhat = array('ą', 'ć', 'ę', 'ł', 'ń', 'ó', 'ś', 'ż', 'ź', 'Ą', 'Ć', 'Ę', 'Ł', 'Ń', 'Ó', 'Ś', 'Ż', 'Ź');
@@ -1474,9 +1486,31 @@
 		sqlClose($conn);
 	}
 	
+	function editCommentWithAuthor($id, $content, $author){
+		$conn = sqlConnect();
+		$sql = "UPDATE `comments` SET `content`='$content', `author` = '$author' WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function addParentToComment($id, $id_parent){
+		$conn = sqlConnect();
+		$sql = "UPDATE `comments` SET `id_parent`=$id_parent WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}	
+	
+	function addAuthorToComment($id, $author){
+		$conn = sqlConnect();
+		$sql = "UPDATE `comments` SET `author`='$author' WHERE id = $id";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
 	function addComment($type, $id_user, $id_item, $content){			
-		$conn = sqlConnect();			
-		$sql = "INSERT INTO `comments` (`type`, `id_user`, `id_item`, `content`) VALUES ($type , $id_user , $id_item , '$content')"; 
+		$conn = sqlConnect();	
+		$data = date("Y-m-d H:m:s");
+		$sql = "INSERT INTO `comments` (`type`, `id_user`, `id_item`, `content`, `date`) VALUES ($type , $id_user , $id_item , '$content', '$data')"; 
 		$conn->query($sql);
 		$id = $conn->insert_id;
 		sqlClose($conn);
@@ -1533,8 +1567,8 @@
 				$wyj .= '</div>
 			</div>';
 		}
-		return $wyj;
 		sqlClose($conn);
+		return $wyj;
 	}
 	
 	function getCommentForPlace($id){
@@ -1551,15 +1585,18 @@
 			$admin = false;
 		}
 		
+		$place = getPlace($id);
 		if($loggedUser['id']) $loggedUserID = $loggedUser['id'];
 		else $loggedUserID = -2;
 		
-		$query="SELECT * FROM `comments` WHERE `id_item` = $id AND `type` = 2 ORDER BY `id` DESC";
+		$query="SELECT * FROM `comments` WHERE `id_item` = $id AND `type` = 2 AND `id_parent` IS NULL ORDER BY `id` DESC";
 		$result=$conn->query($query);
 		$wyj="";
 		while($c = $result->fetch_assoc()) {
+			$childComments = getCommentForParentInArray($c['id']);
+			$author = $c['author'] == false ? 'Anonim' :  $c['author'];
 			if($c['id_user'] == -1){
-				$user = [ "avatar" => "img/bigavatar.png", "login" => "Anonim" ];
+				$user = [ "avatar" => "img/bigavatar.png", "login" => $author ];
 				$owner = false;
 			}else{
 				$user = getUserByID($c['id_user'], $conn);
@@ -1579,15 +1616,103 @@
 					$wyj .= '<h5>'.$user['login'].'</h5>
 					<p>'.$c['content'].'</p>';
 					
+			$wyj .= '<p class="date-comment">'.$c['date'].'</p>';
+			$wyj .= '<div class="comment-rating-details"><table>';
+			$ratingsVals = getRatingValForComment($c['id']);
+			foreach( getRatingForParent( $place['id_kat'] , 1) as $rating){
+				$wyj .= '<tr><td>'.$rating['name'].': </td>';
+				for($i = 0; $i < count($ratingsVals); $i++){
+					if($ratingsVals[$i]['id_rating'] == $rating['id']){
+						$wyj .= '<td><span class="r-s-'.$ratingsVals[$i]['value'].'">
+							<img src="img/active_star.png" alt="1" class="a-s-1">
+							<img src="img/star.png" alt="1" class="n-s-1">
+							<img src="img/active_star.png" alt="1" class="a-s-2">
+							<img src="img/star.png" alt="1" class="n-s-2">
+							<img src="img/active_star.png" alt="1" class="a-s-3">
+							<img src="img/star.png" alt="1" class="n-s-3">
+							<img src="img/active_star.png" alt="1" class="a-s-4">
+							<img src="img/star.png" alt="1" class="n-s-4">
+							<img src="img/active_star.png" alt="1" class="a-s-5">
+							<img src="img/star.png" alt="1" class="n-s-5">
+						</td>';
+					}
+				}
+				$wyj .= '</tr>';
+			}
+			$wyj .= '</table></div>';
 			if($admin) $wyj .= '<div class="editComment-panel"><form class="editComment">
 									<textarea class="edit-comment-field" name="content" placeholder="Napisz komentarz...">'.$c['content'].'</textarea>
 									<input type="hidden" name="id" value="'.$c['id'].'">
 								</form>
 								<button class="accept-btn" onclick="acceptEditComment(this);">zapisz</button></div>';
-				$wyj .= '</div>
+				$wyj .= '</div>';
+			$wyj .= renderChildComment($childComments, $loggedUserID, $admin);
+			$wyj .= '<div class="re-comment"><button class="re-comment-btn btn" onclick="showReCommentForm(this);">Odpowiedz</button></div>';
+			$wyj .= '<div class="re-for-comment hide-on-start">
+						<form class="addNewChildComment">';
+			if($loggedUserID < 0) $wyj .= '<input name="author" placeholder="Anonim" class="author-comment">';
+			$wyj .= '		<textarea name="content" placeholder="Napisz komentarz..."></textarea>
+							<input type="hidden" name="id_parent" value="'.$c['id'].'">
+							<input type="hidden" name="type" value="2">
+							<input type="hidden" name="id_item" value="'.$id.'">
+						</form>
+						<button class="re-comment-btn btn" onclick="add_re_comment(this);">Wyślij</button>
+					</div>';
+			$wyj .= '</div>';
+		}
+		sqlClose($conn);
+		return $wyj;
+	}
+	
+	function renderChildComment($comments, $loggedUserID, $admin){
+		$conn = sqlConnect();
+		$wyj = '';
+		foreach($comments as $c){
+			$author = $c['author'] == false ? 'Anonim' :  $c['author'];
+			if($c['id_user'] == -1){
+				$user = [ "avatar" => "img/bigavatar.png", "login" => $author ];
+				$owner = false;
+			}else{
+				$user = getUserByID($c['id_user'], $conn);
+				$owner = ($user['id'] == $loggedUserID);
+			}
+			$wyj .= '<div class="ev-comment re-comment-cont">
+							<div class="avatar-comment">
+								<img src="img/bigavatar.png" alt="'.$user['login'].'">
+							</div>
+							<div class="comment-content">';
+			if($owner || $admin){
+				$wyj .= '<div class="option-btns">';
+				if($admin)	$wyj .= '<button class="edit-btn" onclick="editComment(this);">edytuj</button>';
+					$wyj .= '<button class="delete-btn" onclick="deleteComment('.$c['id'].');">usuń</button>
+				</div>';
+			}
+			$wyj .= '<h5>'.$user['login'].'</h5>
+			<p>'.$c['content'].'</p>';
+			$wyj .= '<p class="date-comment">'.$c['date'].'</p>';
+			if($admin){ $wyj .= '<div class="editComment-panel"><form class="editComment">';
+									$wyj .= '<input name="author" placeholder="Anonim" class="author-comment" value="'.$user['login'].'">';
+									$wyj .= '<textarea class="edit-comment-field" name="content" placeholder="Napisz komentarz...">'.$c['content'].'</textarea>
+									<input type="hidden" name="id" value="'.$c['id'].'">
+								</form>
+								<button class="accept-btn" onclick="acceptEditComment(this);">zapisz</button></div>';
+			}
+			$wyj .= '</div>
 			</div>';
 		}
+		sqlClose($conn);
 		return $wyj;
+	}
+	
+	function getCommentForParentInArray($id){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `comments` WHERE `id_parent` = $id";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		return $res;
 		sqlClose($conn);
 	}
 	
@@ -1874,9 +1999,9 @@
 		sqlClose($conn);
 	}
 	
-	function editFilterField($id, $name){
+	function editFilterField($id, $name, $idP = -1){
 		$conn = sqlConnect();
-		$sql = "UPDATE `filter_field` SET `name`='$name' WHERE  id = $id";
+		$sql = "UPDATE `filter_field` SET `name`='$name', `id_parent_field`=$idP WHERE  id = $id";
 		$conn->query($sql);
 		sqlClose($conn);
 	}
@@ -1910,6 +2035,27 @@
 		}
 		sqlClose($conn);
 		return $res;
+	}
+	
+	function getAllParentsFieldForFilterField($id){
+		$conn = sqlConnect();
+		$query="SELECT `id` FROM `filter_field` WHERE `id_parent_field` = $id";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		
+		sqlClose($conn);
+		if(count($res) == 0){
+			return '';
+		}else{
+			$tmp = '';
+			foreach($res as $r){
+				$tmp .= $r['id'].'-'.getAllParentsFieldForFilterField($r['id']).'-';
+			}
+			return $tmp;
+		}
 	}
 	/**END FILTER FIELD**/
 	/**START RATING**/
@@ -2026,21 +2172,27 @@
 		$results = [];
 		$globalsum = 0;
 		$globalcount = 0;
+		$activeRatings = []; 
+		foreach(getRatingForParent( $id_cat , 1) as $r){
+			$activeRatings[] = $r['id'];
+		}
 		foreach($ratings as $r){
-			$results[] = $r['id'];
-			$sum = 0;
-			$count = 0;
-			foreach($comments as $c){
-				$vote = getRatingValForRatingAndComment($r['id'], $c['id']);
-				if(count($vote) > 0){
-					$count++;
-					$sum += $vote[0]['value'];
-					$globalcount++;
-					$globalsum += $vote[0]['value'];
+			if(in_array($r['id'], $activeRatings)){
+				$results[] = $r['id'];
+				$sum = 0;
+				$count = 0;
+				foreach($comments as $c){
+					$vote = getRatingValForRatingAndComment($r['id'], $c['id']);
+					if(count($vote) > 0){
+						$count++;
+						$sum += $vote[0]['value'];
+						$globalcount++;
+						$globalsum += $vote[0]['value'];
+					}
 				}
+				if($count > 0) $results[] = $sum/$count;
+				else $results[] = 0; //nieocenione jeszcze
 			}
-			if($count > 0) $results[] = $sum/$count;
-			else $results[] = 0; //nieocenione jeszcze
 		}
 		$results[] = -1;
 		if($globalcount > 0) $results[] = $globalsum/$globalcount;
@@ -2234,14 +2386,15 @@
 			sqlClose($conn);
 			return $row;
 		}
+		return null;
 	}
 	
 	function getPlaceBySlug($slug){
 		$conn = sqlConnect();
-		$query="SELECT * FROM `miejsce";
+		$query="SELECT * FROM `miejsce`";
 		$result=$conn->query($query);
 		while($row = $result->fetch_assoc()) {		
-			if($slug == makeSlug($row['name'])){
+			if($slug == makeSlug($row['nazwa'])){
 				sqlClose($conn);
 				return $row;
 			}			
@@ -2258,17 +2411,30 @@
 		$wyj = "";
 		for($i = 65; $i < 91; $i++)
 		{
-			if($i%2 == 1) {$wyj.="<tr class='letterTR'>\n";}
-			$wyj.='<td class="letter"><table>
-							<tr><th>'.chr($i).'</th></tr>';
+			$wyj .= '<div class="placesLetter"><p class="bold-letter">'.chr($i).'</p>';
 			$sql = "SELECT * FROM `miejsce` WHERE `nazwa` LIKE '".chr($i)."%'"; 
 			$result=$con->query($sql);
 			while($row = $result->fetch_assoc()) {				
-				$wyj .= '<tr><td><a class="set_place" data-id="'.$row["id"].'">'.$row["nazwa"].'</a></td></tr>';					
+				$wyj .= '<a href="add_event.php?place='.$row["id"].'">'.$row["nazwa"].'</a>';					
 			}
-			$wyj .= '</table></td>';
-			if($i%2 == 0) {$wyj.="</tr>";} 
+			$wyj .= '</div>';
 		}	
+		
+		$wyj .= '<div class="placesLetter"><p class="bold-letter">Ż</p>';
+		$sql = "SELECT * FROM `miejsce` WHERE `nazwa` LIKE 'Ż%'"; 
+		$result=$con->query($sql);
+		while($row = $result->fetch_assoc()) {				
+			$wyj .= '<a href="#?id='.$row["id"].'">'.$row["nazwa"].'</a>';					
+		}
+		$wyj .= '</div>';
+			
+		$wyj .= '<div class="placesLetter"><p class="bold-letter">Ź</p>';
+		$sql = "SELECT * FROM `miejsce` WHERE `nazwa` LIKE 'Ź%'"; 
+		$result=$con->query($sql);
+		while($row = $result->fetch_assoc()) {				
+			$wyj .= '<a href="#?id='.$row["id"].'">'.$row["nazwa"].'</a>';					
+		}
+		$wyj .= '</div>';
 		return $wyj;
 	}
 	
@@ -2423,5 +2589,90 @@
 			$i++;
 		}
 		sqlClose($conn);
+	}
+	
+	function getEventCats(){
+		$conn = sqlConnect();
+		$query="SELECT * FROM `kategorie`";
+		$result=$conn->query($query);
+		$res = [];
+		while($c = $result->fetch_assoc()) {
+			$res[] = $c;
+		}
+		sqlClose($conn);
+		return $res;
+	}
+	
+	function addEvent($name, $id_kat, $image, $thumb, $data, $time, $time_end, $desc, $id_place, $id_user, $www, $yt, $price){
+		$recommend = 0;
+		$views = 0;
+		$like = 0;
+		$comments = 0;
+		$desc_img = '';
+		$id_group = -1;
+		
+		$conn = sqlConnect();	
+		$sql = "INSERT INTO `wydarzenia`(`nazwa`, `id_kat`, `miniatura`, `obraz`, `polecane`, `data`, `czas`, `data_end`, `czas_end`, `opis`, `id_miejsce`, `widzow`, `ulubione`, `komentarzy`, `id_user`, `grupa`, `www`, `yt`, `cena`, `opis_img`) VALUES ('".$name."',".$id_kat.",'".$thumb."','".$image."',".$recommend.",'".$data."','".$time."','".$data."','".$time_end."','".$desc."',".$id_place.",".$views.",".$like.",".$comments.",'".$id_user."',".$id_group.",'".$www."','".$yt."','".$price."','".$desc_img."')"; 
+		$conn->query($sql);
+		$id = $conn->insert_id;
+		sqlClose($conn);
+		
+		//doSiteMap();
+		//sendAfterNewEventMailToOwner($id, $name);		
+		return $id;
+	}
+	
+	function updateGroupId($id_group, $id_event){
+		$conn = sqlConnect();
+		$sql = "UPDATE `wydarzenia` SET `grupa`= $id_group WHERE `id` = $id_event";
+		$conn->query($sql);
+		sqlClose($conn);
+	}
+	
+	function getOpenHoursForPlaceJSON($id){
+		$p = getPlace($id);
+		if($p != null){
+			$hasOpenHours = false;
+			foreach(getStaticFieldForParent($p['id_kat'], 1) as $d){
+				if($d['id_field'] == 4){
+					$hasOpenHours = true;
+					$idFieldOpenHours = $d['id'];
+				}
+			}
+			if($hasOpenHours){
+				return getDescFieldVal($idFieldOpenHours, 0, $p['id'], 1)[0]['value'];
+			}
+		}		
+		return false;
+	}
+	
+	function getTimeStartForPlaceForData($id_place, $data){
+		$openhours = getOpenHoursForPlaceJSON($id_place);
+		if($openhours){
+			$openhours = json_decode($openhours);
+			$weekDay = date('w', strtotime($data));
+			$weekDay = $weekDay != 0 ? $weekDay-1 : $weekDay = 6;
+			if($openhours[$weekDay*2] == ""){
+				return false;
+			}
+			return $openhours[$weekDay*2];
+		}else{
+			false;
+		}
+	}	
+	
+	function getTimeEndForPlaceForData($id_place, $data){
+		$openhours = getOpenHoursForPlaceJSON($id_place);
+		if($openhours){
+			$openhours = json_decode($openhours);
+			$weekDay = date('w', strtotime($data));
+			$weekDay = $weekDay != 0 ? $weekDay-1 : $weekDay = 6;
+			if($openhours[$weekDay*2+1] == ""){
+				return false;
+			}
+			return $openhours[$weekDay*2+1];
+		}else{
+			false;
+		}
 	}
 ?>

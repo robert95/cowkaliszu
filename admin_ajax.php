@@ -27,7 +27,7 @@
 				if($_GET['id'] == -1 ) {
 					if($_GET['name'] != "") addFilterField($_GET['name'], $_GET['idF']);
 				}else{
-					if($_GET['name'] != "") editFilterField($_GET['id'], $_GET['name']);
+					if($_GET['name'] != "") editFilterField($_GET['id'], $_GET['name'], $_GET['idP']);
 					else deleteFilterField($_GET['id']);
 				}
 			}else if($action == "addfilter"){
@@ -40,7 +40,7 @@
 						<ul class="">';
 					$filterFields = getFiltersForFilter($filterID);
 					foreach($filterFields as $f){
-						echo '<li data-id="'.$f['id'].'">'.$f['name'].'</li>';
+						echo '<li data-idP="'.$f['id_parent_field'].'" data-id="'.$f['id'].'">'.$f['name'].'</li>';
 					}
 					echo '</ul>
 					</li>';						
@@ -54,7 +54,7 @@
 							<ul class="">';
 						$filterFields = getFiltersForFilter($f['id']);
 						foreach($filterFields as $ff){
-							echo '<li data-id="'.$ff['id'].'">'.$ff['name'].'</li>';
+							echo '<li data-idP="'.$ff['id_parent_field'].'" data-id="'.$ff['id'].'">'.$ff['name'].'</li>';
 						}
 						echo '</ul>
 						</li>';	

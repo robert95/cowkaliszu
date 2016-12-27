@@ -65,7 +65,8 @@ function runFilter(){
 	for(var i = 0; i < filters.length; i+=2) {
 		filtersIds = filters[i+1];
 		$('.event').each(function(){
-			var fIds = $(this).data('filters');
+			var fIds = $(this).data('filters') + '';
+			console.log(fIds);
 			fIds = fIds.split('-');
 			var notInFilter = true;
 			for(var i = 0; i < filtersIds.length; i++){

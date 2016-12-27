@@ -1,0 +1,37 @@
+- tryb czasu po dodaniu daty
+- + i - po hoverze
+- pojawienie się opcji trybu jak miejsce ma godziny otwarcia, najlepiej robić to ajaxem, żeby po zmienie miejsca nie było problemów
+- jak dodajemu według godzin i w jakiś dzień nie ma godzin to nie dodajemy wydarzenie w ten dzień(?)-pytanie
+- zmień miejsce
+- ustawianie miniatury na środku
+- edycja wydarzenia
+- edycja czasu i daty w wydarzeniu - ustawić zmienną "dates" i zrobić add date dla kazdej daty
+- walidacja dodawania wydarzenia po stronie serweru
+- komunikat o poprawnym dodaniu (po przeładowaniu strony)/albo błędy do poprawy
+- centrowanie mapy po zmienie miejsca
+- chmurka z nazwą miejsca taka jak na podstronie wydarzenia
+- dodanie loadigng gdy wrzuca się zdjęcie
+- jak ktoś nie wybrał miniatury to chujowo kadruje
+- walidacja dodawania wydarzenia po stronie serweru
+- naprawa błędów z komentarzami
+- jak nie ma żadnego komentarza i dodajemy jako piersi to jak dodamy dwa na raz to wyświetli tylko 1
+
+- wydarzenia dodają się x razy - IMPORTANT!
+- gdy dodajemy grupę, zdjęcie uploadujemy tylko raz - IMPORTANT!
+- ogarnąć podstonę wydarzenie(te wszystkie wydarzenie z tej kategorii itd ) i info o miejscu z prawej
+- ogarnąć podstonę miejsca (najbliższe wydarzenia w tym miejscu czy jakos tak)
+- dodanie miejsca-przekierowanie na dodanie wydarzenia jak jest ustawione coś w linku
+- edycja grupy wydarzenia
+- odpowiedzi na komentarze w wydarzeniach
+- komentarze bez oceny(?)
+- gdy w dany dzień miejsce jest zamknięte, a jest zaznaczoa zależność od godzin miejsca, musi ręcznie podać godziny
+- reszta rzeczy z maila od słonia
+
+- ogarnać uprawnienia
+- zabezpieczenie zapytań przed sql injection - php PDO
+- edycja grupy wydarzenia
+- zbiorowe wysyłanie jednego potwierdzenia po doddaniu wydarzenia
+- walidacja po stronie serwera - kilka dat, gdy jest źle to jest traci
+- przesień wszystko na smarty - to może na końcu
+
+

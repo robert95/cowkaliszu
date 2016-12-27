@@ -29,7 +29,7 @@
 			<table>
 				<tr>
 					<td><img src="img/add.png" alt="Dodaj" id="add_img"/></td>
-					<td class="add" onclick="window.location.href = 'addevent_1.php';"><a href="addevent_1.php">DODAJ WYDARZENIE</a></td>
+					<td class="add" onclick="window.location.href = 'set_place.php';"><a href="set_place.php">DODAJ WYDARZENIE</a></td>
 					<?php
 						if($zalogowany == 1)
 						{
@@ -61,7 +61,7 @@
 			<table>
 				<tr>
 					<td><img src="img/add.png" alt="Dodaj" id="add_img_fix"/></td>
-					<td class="add" onclick="window.location.href = 'addevent_1.php';"><a href="addevent_1.php">DODAJ WYDARZENIE</a></td>
+					<td class="add" onclick="window.location.href = 'set_place.php';"><a href="set_place.php">DODAJ WYDARZENIE</a></td>
 					<?php
 						if($zalogowany == 1)
 						{
@@ -86,7 +86,7 @@
 		<tr><td onclick="doKalendarza();"><a>KALENDARZ</a></td></tr>
 		<tr><td><a href="mapa.php">MAPA</a></td></tr>
 		<tr><td><a href="miejsca.phps">MIEJSCA</a></td></tr>
-		<tr><td><a href="addevent_1.php">DODAJ WYDARZENIE</a></td></tr>
+		<tr><td><a href="set_place.php">DODAJ WYDARZENIE</a></td></tr>
 		<?php
 			if($zalogowany == 1)
 			{

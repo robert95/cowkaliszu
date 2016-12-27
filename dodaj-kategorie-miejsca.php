@@ -110,7 +110,7 @@
 			<ul class="">';
 		$filterFields = getFiltersForFilter($f['id']);
 		foreach($filterFields as $ff){
-			$filter .= '<li data-id="'.$ff['id'].'">'.$ff['name'].'</li>';
+			$filter .= '<li data-idP="'.$ff['id_parent_field'].'" data-id="'.$ff['id'].'">'.$ff['name'].'</li>';
 		}
 		$filter .= '</ul>
 		</li>';	
@@ -180,7 +180,7 @@
 					<input type="hidden" name="img" id="img" value="">
 					<input type="hidden" name="X" id="X" value="0"/>
 					<input type="hidden" name="Y" id="Y" value="0"/>
-					<input type="hidden" name="W" id="W" value="100"/>
+					<input type="hidden" name="W" id="W" value="1000"/>
 					<input type="hidden" name="changeThumb" id="changeThumb" value="0"/>
 					<input type="hidden" name="imgWidth" id="imgWidth" value="0"/>
 					<input type="hidden" name="old_image" id="old_image" value="<?php echo $image; ?>"/>
@@ -196,7 +196,7 @@
 							<button class="btn btn-add" id="add_main_thumb" onclick="startDoThumb(100,100,100)" type="button">Ustaw miniaturę</button>
 							<button class="btn btn-cancel" id="stop_main_thumb" onclick="destroyJcrop();" type="button">Zapisz miniaturę</button>
 						</div>
-						<div class="mainevent_desc">
+						<div class="mainevent_desc place_cat_desc">
 						    <div class="mainevent-title-box eventpage_desc">
 								<input type="text" name="name" class="cat-form-name" value="<?php echo $name; ?>" placeholder="Wpisz nazwę kategorii">
 							</div>

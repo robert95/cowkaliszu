@@ -106,6 +106,7 @@
 							</section>';
 				}?>
 				<section id="top_events">
+					<br><br><a class="btn" href="add_event.php?id=<?php echo $id;?>">Edytuj wydarzenie</a><br><br>
 					<h1 id="event_id" data-id="<?php echo $event['id']; ?>"><a href="/">co.wkaliszu.pl</a> > <a href="/#kalendarz">wydarzenia</a> > <?php echo $event['nazwa']; ?> <?php if($is_archive) echo '<span class="s_archive"> - UWAGA! To wydarzenie już się zakończyło!</span>';?></h1>
 					<div id="main_event" class="main_on_eventpage">
 						<input type="hidden" id="event_info" data-title="<?php echo $event['nazwa']; ?>" data-place="<?php echo $place['nazwa']; ?>"/>
@@ -216,8 +217,12 @@
 							<button id="addComment" onclick="add_comment();">Dodaj</button>
 						</div>
 					</div>
-					<div class="comments-list">
+					<div class="comments-list comment-cont">
 						<?php echo getCommentForEvent($event['id']); ?>
+						<p class="show-more" onclick="showMoreComments();">pokaż więcej komentarzy</p>
+						<div class="loading-panel full-loading-panel">
+							<img src="img/loading.gif" alt="Ładowanie">
+						</div>
 					</div>
 				</section>
 				<?php if($is_waiting && ($per == 1 || $per == 2)) echo '<div class="acceptEvent accept" data-id="'.$event['id'].'">AKCEPTUJ</div>';?>

@@ -28,10 +28,33 @@
 }
 #place-main-container #id_kat{
 	height: 31px;
-	margin: 7px auto;
-	width: 282px;
+	margin: 6px auto;
+	/*width: 282px;*/
 	font-size: 20px;
 	padding: 0px 10px;
+	background: none;
+	border: 0;
+	appearance: none;
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	cursor: pointer;
+	color: white;
+	padding-right: 20px;
+}
+#place-main-container #id_kat_wrapper::after{
+	content: '';
+	background: url('arrow_down.png');
+	width: 15px;
+	height: 8px;
+	position: absolute;
+	top: 20px;
+	right: 0px;
+	background-size: 15px 8px;
+	pointer-events: none;
+}
+#place-main-container #id_kat_wrapper{
+	display: inline-block;
+	position: relative;
 }
 .place-page-container .place-name, .place-page-container .place-name input{
 	font-size: 30px !important;
@@ -77,6 +100,11 @@
 .place-page-container .place-hours-edit input{
 	width: 40px;
 	font-size: 12px !important;
+	margin-top: 4px;
+	height: 16px !important;
+}
+.place-page-container .place-hours-edit .firstInput{
+	margin-left: 10px;
 }
 .place-page-container .place-hours-edit span{
 	display: inline-block;
@@ -87,6 +115,17 @@
 	position: absolute;
 	top: 10px;
 	right: 10px;
+	font-size: 19px;
+}
+.place-page-container .place-hours-edit div{
+	margin: 8px 0;
+}
+.place-page-container .place-hours-edit div .rad{
+	font-size: 17px;
+    color: black;
+}
+.place-page-container .place-hours-edit span{
+	font-size: 16px !important;
 }
 .show-place-page #main_picture{
 	display: block !important;
@@ -101,8 +140,8 @@
 	font-size: 16px !important;
 }
 .show-place-page #place-show-open-hours{
-	color: #a3a5a8 !important;
-	font-size: 16px !important;
+	color: black !important;
+	font-size: 18px !important;
 }
 .show-place-page .desc-field{
 	color: black !important;
@@ -125,7 +164,7 @@
 .show-place-page  #place-filters p{
 	font-size: 21px;
 	border-bottom: 0px;
-	margin: 8px 0;
+	margin: 0;
 	color: #00b0b5;
 }
 .show-place-page  #place-filters p span{
@@ -147,4 +186,91 @@
 	color: #00b0b5;
 	top: 0;
 	vertical-align: bottom;
+}
+#place-show-open-hours td:first-of-type{    
+	width: 60px !important;
+}
+#place-desc-hours-time{
+	position: absolute;
+	top: 20px;
+	right: 28px;
+	font-size: 18px !important;
+}
+#place-desc-hours-time p.desc-field{    
+	font-size: 19px !important;
+}
+#place-desc-fileds .desc-field .show-contact{    
+	color: #00AFB4 !important;
+	cursor: pointer;
+}
+.show-contact:hover{    
+	text-decoration: underline;
+}
+#place-desc-fileds .desc-field  .hidden-contact{
+	display: none;
+}
+#rating-result-container{
+	padding: 10px;
+	border-top: 1px solid #a3a5a8;
+	margin: 0 10px;
+}
+#rating-result-container .main-average{
+	font-size: 40px;
+	max-width: 50%;
+	display: inline-block;
+}
+#rating-result-container .main-average span{
+	color: #00AFB4;
+}
+#rating-result-container .main-average .rate-this-place{
+	font-size: 16px;
+    cursor: pointer;
+    display: block;
+    margin: 6px 0;
+}
+#rating-result-container .main-average .rate-this-place:hover{
+	text-decoration: underline;
+}
+#rating-result-container #rating-details, .comment-rating-details{
+	float: right;
+	font-size: 16px;
+}
+.comment-rating-details{
+	margin: 0px 20px;
+}
+#rating-result-container #rating-details table, .comment-rating-details table{
+	font-size: 18px;
+	color: black;
+	text-align: left;
+}
+#rating-result-container #rating-details table td:first-of-type, .comment-rating-details table td:first-of-type{
+	width: auto;
+	margin: 0;
+	padding-right: 5px;
+}
+#rating-result-container #rating-details table img, .comment-rating-details table img {
+    width: 18px;
+    margin: 0 1px;
+}
+#add-event-in-place a{
+    position: relative;
+	display: inline-block;
+	margin: 30px 0 0 26px;
+}
+#add-event-in-place a img{
+    position: absolute;
+	top: 0;
+	left: -27px;
+}
+.show-place-page #main_event_desc .place-created-by{
+    margin: 0px !important;
+	font-size: 14px !important;
+	color: #b0b0b0 !important;
+}
+.show-place-page .event-comments {
+    margin-top: 20px;
+}
+.btn-red{
+	background: #bc1622;
+	border: 1px solid #bc1622;
 }

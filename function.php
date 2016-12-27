@@ -67,6 +67,17 @@
 		$w = $_POST['W'];
 		$realW = imagesx($img_r);
 		$realY = imagesy($img_r);
+		if(intval($w) > 651){
+			if($realW > $realY){
+				$x = intval((650 - ((650*$realY)/$realW))/2);
+				$y = 0;
+				$w = intval(650 - $x*2);
+			}else{
+				$y = intval(($realY - 650)/2);
+				$x = 0;
+				$w = 650;
+			}
+		}
 		$p = $realW/$width;
 		$x *= $p;
 		$y *= $p;
@@ -108,7 +119,7 @@
 		return $target_file;
 	}
 	
-	function addEvent($conn)
+	/*function addEvent($conn)
 	{
 		$name = $_SESSION["name"];
 		$id_kat = $_SESSION["id_kat"];
@@ -133,7 +144,7 @@
 		addEventDB($conn, $name, $id_kat, $thumb, $image, $rec, $data, $time, $data_end, $time_end, $desc, $id_place, $views, $comments, $like, $id_user, $group, $www, $yt, $price, $desc_img);
 		sendAfterNewEventMailToOwner($_SESSION["id"], $name);
 		doSiteMap();
-	}
+	}*/
 	
 	function editEvent($conn)
 	{

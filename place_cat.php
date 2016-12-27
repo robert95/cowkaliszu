@@ -79,6 +79,7 @@
 								<div class="list-of-activ-filter-fields">
 								</div>
 							</div>
+							<div class="event-list-direct-cont">
 							<?php
 							$i = 1;
 							foreach ($places as $p)
@@ -113,17 +114,22 @@
 								$filters = getFiltersForParent($placeCat['id'], 1);
 								foreach($filters as $f){
 									$fields = getFiltersForFilter($f['id']);
+									$parIds = '';
 									foreach($fields as $ff){
 										$val = getFilterFieldVal($ff['id'], $p['id'], 1);
 										$val = count($val) > 0 ? $val[0]['value'] : 0; 
 										$checked = $val == 1 ? "checked" : "";
-										if($checked) $filtersFieldsIds .= $ff['id'].'-';
+										if($checked){
+											$filtersFieldsIds .= $ff['id'].'-';
+											$parIds .= getAllParentsFieldForFilterField($ff['id']);
+										}
 									}
+									$filtersFieldsIds .= $parIds;
 								}	
 								$filtersFieldsIds = substr($filtersFieldsIds, 0, strlen($filtersFieldsIds)-1);
 								//$liked_icon = isLiked($e["id"], $conn) == 0?'img/add_to_fav.png':'img/del_to_fav.png';
 																
-								echo '<div class="event-n event" onmouseover="zaznaczNaMapie(this);" id="e_'.$i.'" data-link="'.$link.'" data-x="'.$p['x'].'" data-y="'.$p['y'].'" data-title="'.$p['nazwa'].'" data-address="'.$p['adres'].'" data-id="'.$p['id'].'" data-filters="'.$filtersFieldsIds.'">
+								echo '<div class="event-n event" onmouseover="zaznaczNaMapie(this);" id="e_'.$i.'" data-rating="'.$avgRating.'" data-link="'.$link.'" data-x="'.$p['x'].'" data-y="'.$p['y'].'" data-title="'.$p['nazwa'].'" data-address="'.$p['adres'].'" data-id="'.$p['id'].'" data-filters="'.$filtersFieldsIds.'">
 											<div class="event-th-n">
 												<a href="'.$link.'">
 													<img src="'.$thumb.'" alt="'.$p['nazwa'].'"  class="eve-thumb">
@@ -180,8 +186,9 @@
 								$i++;
 							}
 							?>
+							</div>
 							<p class="day-header no-events">Przykro nam, nie ma wydarzeń spełniających Twoje kryteria:(</p>
-							<div class="loading-panel">
+							<div class="loading-panel full-loading-panel">
 								<img src="img/loading.gif" alt="Ładowanie">
 							</div>
 						</div>
@@ -221,6 +228,7 @@
 		<script type="text/javascript" src="js/skrypt_liked.js"></script>
 		<script type="text/javascript" src="js/skrypt_widget.js"></script>
 		<script type="text/javascript" src="js/scripts_mobile.js"></script>
+		<script type="text/javascript" src="js/scripts_sorting.js"></script>
 		<div id="fb-root"></div>
 		<script>(function(d, s, id) {
 		  var js, fjs = d.getElementsByTagName(s)[0];

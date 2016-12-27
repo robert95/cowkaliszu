@@ -63,7 +63,7 @@
 		<div id="top">			
 			<section id="container">
 				<div class="row">
-					<?php if($admin) echo '<a href="dodaj-kategorie-miejsca.php" class="btn">Dodaj nową kategorię miejsc</a><br>'; ?>
+					<?php if($admin) echo '<a href="dodaj-kategorie-miejsca.php" class="btn">Dodaj nową kategorię miejsc</a>'; ?>
 					<a href="edytuj-miejsce.php" class="btn">Dodaj nowe miejsce</a><br><br>
 					<?php echo $catsList;?>
 				</div>

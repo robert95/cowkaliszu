@@ -47,7 +47,6 @@ session_start();
 	//sqlClose($conn);
 	
 	function validateForm(){
-		
 		$kom = "";
 		if(!isset($_SESSION["name"])) $kom .= "Brak nazwy<br>";
 		if(!isset($_SESSION["id_kat"])) $kom .= "Wybierz kategorię<br>";

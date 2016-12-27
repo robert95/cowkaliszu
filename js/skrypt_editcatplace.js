@@ -1,3 +1,6 @@
+$( document ).ready(function(e) {
+	startSortabaleField();
+});
 /**filters-edit**/
 $("#add-new-filter-filed").click(function(){
 	var newField = '<input type="text" class="cat-form-name" name="filter-field-name[]" data-id="-1" value="" placeholder="Dodaj opcję dla tego filtra">';
@@ -14,6 +17,25 @@ $("#cancel-edit-filter").click(function(){
 	$(".edit-filer-fields-list").append(newField);
 });
 
+var optionsToFilter = "";
+function setOptionsBoxToFilter(filterFields, idP, idF, type){
+	if(type == 2){
+		optionsToFilter = '<select name="parentFilterField">';
+		optionsToFilter += '<option value="-1">---------</option>';
+		$( filterFields ).each(function( index ) {
+			var idE = $(this).data('id');
+			var optText = $(this).text();
+			if(idE != idF){
+				var selected = idP == idE ? 'selected' : '';
+				optionsToFilter += '<option value="'+idE+'" '+ selected + '>'+optText+'</option>';
+			}
+		});
+		optionsToFilter += '</select>';
+	}else{
+		optionsToFilter = "";
+	}
+}
+
 function editFilter(obj){
 	var id = $(obj).parent('.filter-elem').data('id');
 	var type = $(obj).parent('.filter-elem').data('type');
@@ -22,9 +44,12 @@ function editFilter(obj){
 	$(".edit-filer-fields-list").html("");
 	$( filter_elem ).each(function( index ) {
 		var idE = $(this).data('id');
+		var idP = $(this).data('idp');
+		setOptionsBoxToFilter(filter_elem, idP, idE, type);
 		var optText = $(this).text();
+		selectbox = optionsToFilter;
 		var newField = '<input type="text" class="cat-form-name" name="filter-field-name[]" data-id="' + idE + '" value="' + optText + '" placeholder="Dodaj opcję dla tego filtra">';
-		$(".edit-filer-fields-list").append(newField);
+		$(".edit-filer-fields-list").append('<div>' + newField + selectbox + '</div>');
 	});
 	
 	$("#filter-id").val(id);
@@ -239,9 +264,11 @@ $("#save-edit-filter").click(function(){
 	}else{
 		$(".edit-filer-fields-list input").each(function(index){
 			var idF = $(this).data('id');
+			var idPF = $(this).next('select').val();
 			var nameF = $(this).val();
 			nameF = encodeURIComponent(nameF);
-			var url = "admin_ajax.php?action=addfilterfield&idF=" + id + "&name=" + nameF + "&id=" +idF;
+			var url = "admin_ajax.php?action=addfilterfield&idF=" + id + "&name=" + nameF + "&id=" +idF + "&idP=" +idPF;
+			console.log(url);
 			$.ajax({
 				url: url,
 				async: false

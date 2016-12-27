@@ -147,7 +147,7 @@
 		<div id="top" class="place-page-container">			
 			<section id="container">
 				<input type="file" name="file" id="image" class="btn hide">
-				<form action="" method="post">
+				<form action="" id="place-add-form" method="post" onsubmit="return validateForm(event)">
 				<section id="top_events">		
 					<input type="hidden" name="id" id="place_id" value="<?php echo $id; ?>">
 					<h1 id="event_id" data-id="<?php echo $id; ?>"><?php echo ($id>0) ? 'Edycja': 'Dodawanie';?> miejsca</h1>
@@ -175,26 +175,36 @@
 						</div>
 						<div class="mainevent_desc">
 						    <div class="mainevent-title-box eventpage_desc">
-								<select name="id_kat" id="id_kat">
-									<?php
-										foreach(getPlaceCats() as $c){
-											$selected = $c['id'] == $id_kat ? 'selected' : '';
- 											echo '<option value="'.$c['id'].'" '.$selected.'>'.$c['name'].'</option>';
-										}
-									?>
-								</select>
+								<div id="id_kat_wrapper">
+									<select name="id_kat" id="id_kat">
+										<?php
+											foreach(getPlaceCats() as $c){
+												$selected = $c['id'] == $id_kat ? 'selected' : '';
+												echo '<option value="'.$c['id'].'" '.$selected.'>'.$c['name'].'</option>';
+											}
+										?>
+									</select>
+								</div>
 							</div>
 							<div class="mainevent-info-box">
 								<input type="hidden" name="ax" id="ax" value="<?php echo $x; ?>"/>
 								<input type="hidden" name="ay" id="ay" value="<?php echo $y; ?>"/>
-								<h1 class="place-name"><input type="text" name="name" class="cat-form-name" value="<?php echo $name; ?>" placeholder="Wpisz nazwę miejsca"></h1>
-								<h2 class="place-adress"><input type="text" name="adress" id="adress" class="cat-form-name" value="<?php echo $adress; ?>" placeholder="Wpisz adres miejsca"></h2>
+								<h1 class="place-name">
+									<p class="error" id="empty-place-name">Podaj nazwę miejsca</p>
+									<p class="error" id="ununique-place-name">Miejsce o takiej nazwie już istnieje!</p>
+									<input type="text" name="name" class="cat-form-name" value="<?php echo $name; ?>" placeholder="Wpisz nazwę miejsca">
+								</h1>
+								<h2 class="place-adress">
+									<p class="error" id="empty-place-address">Podaj poprawny adres miejsca</p>
+									<input type="text" name="adress" id="adress" class="cat-form-name" value="<?php echo $adress; ?>" placeholder="Wpisz adres miejsca">
+								</h2>
 								<div id="place-desc-fileds">
 								</div>
 							</div>
 						</div>
 					</div>
 					<div id="main_event_desc">
+						<p class="error" id="empty-place-desc">Podaj opis miejsca</p>
 						<p><textarea name="opis" placeholder="Opis..." id="place_desc"><?php echo $desc;?></textarea></p>
 					</div>
 					<div id="place-gallery">
@@ -215,7 +225,19 @@
 				<a href="regulamin.php">Regulamin i polityka prywatno&#347;ci</a>
 				<a style="float: right; margin-right: 20px;" href="http:\\www.pinkelephant.pl"> Projekt www.pinkelephant.pl</a>
 			</div>
-		</footer>				
+		</footer>
+		<div id="confirm-adding-without-image" class="cat-filter-container">
+			<div class="vertical-center-wrap">
+				<p class="center">
+					Nie dodana zdjęcia dla tego miejsca<br>
+					Zdjęcie zostanie zastąpione zdjęciem kategorii<br>
+					Czy chcesz kontynuować?
+					<br><br>
+					<button class="btn btn-add" id="yes-add-no-image" onclick="acceptPhotoWarning()">Tak</button>
+					<button class="btn btn-cancel" id="back-to-add-image" onclick="hidePhotoWarning()">Nie</button>
+				</p>
+			</div>
+		</div>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 		<script src="https://maps.google.com/maps/api/js?key=AIzaSyDa4nN-bDVonpOyK5S7HAx23krp3ZBRLhE&sensor=false" type="text/javascript"></script>
 		<script type="text/javascript" src="js/skrypt_widget.js"></script>
@@ -223,6 +245,5 @@
 		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 		<script type="text/javascript" src="js/place-scripts.js"></script>
 		<script type="text/javascript" src="js/edit-place-scripts.js"></script>
-		<?php if($per >=1 || 1) echo '<script type="text/javascript" src="js/skrypt_editcatplace.js"></script>';?>
 	</body>
 </html>	

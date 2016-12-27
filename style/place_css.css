@@ -63,9 +63,31 @@
 #place-main-container .cat-form-name{
 	height: 30px;
 	margin: 4px auto;
-	width: 425px;
+	width: 360px;
 	font-size: 21px;
 	padding: 3px 8px;
+}
+.checkbox-square{
+	display: none;
+}
+.checkbox-square + label{
+    background:url('no-check-sq.png') no-repeat;
+    height: 20px;
+    width: 20px;
+    display:inline-block;
+    padding: 0 0 0 0px;
+	cursor: pointer;
+	vertical-align: bottom;
+	margin-right: 11px;
+}
+.checkbox-square:checked + label{
+    background:url('check-sq.png') no-repeat;
+    height: 20px;
+    width: 20px;
+    display:inline-block;
+    padding: 0 0 0 0px;
+	vertical-align: bottom;
+	margin-right: 11px;
 }
 #place-main-container .rating-field-list .cat-form-name{
 	width: 400px;
@@ -267,4 +289,7 @@
 }
 .comment-off .comment-on-btn{
 	display: none;
+}
+#place-add-form .mainevent-title-box{
+	height: 45px !important;
 }
