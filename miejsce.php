@@ -73,6 +73,11 @@
 					<h1 id="event_id" data-id="<?php echo $id; ?>"><a href="/">co.wkaliszu.pl</a> > <a href="/miejsca.php">miejsca</a> > <a href="/miejsca.php"><?php echo $cat['name']; ?></a> > <?php echo $name; ?></h1>
 					<div id="event_right">
 						<div id="place_on_map" style="height: 500px;"></div>
+						<div class="other-event-in-place events-in-place-placepage">
+							<h3>Najbliższe wydarzenia w tym miejscu</h3>
+							<?php echo getEventInPlacePage($id); ?>
+							<p class="more-event" onclick="showMoreEventsInPlace();">więcej</p>
+						</div>
 					</div>
 					<div id="main_event" class="main_on_eventpage">
 						<div class="mainevent_img_on_eventpage">
@@ -119,6 +124,8 @@
 													'.$val.'
 													</span>
 												</p>';
+											}else if($name == "strona www"){
+												echo '<p class="desc-field">'.$name.': <span><a href="http://'.$val.'" target="_blank">'.$val.'</a></span></p>';
 											}else{
 												echo '<p class="desc-field">'.$name.': <span>'.$val.'</span></p>';
 											}
@@ -173,7 +180,7 @@
 						</div>
 					</div>
 					<div id="add-event-in-place">
-						<a class="btn" href="addevent_1.php"><img src="img/add.png" alt="Dodaj wydarzenie">Dodaj wydarzenie w tym miejscu</a><br><br>
+						<a class="btn" href="add_event.php?place=<?php echo $id; ?>"><img src="img/add.png" alt="Dodaj wydarzenie">Dodaj wydarzenie w tym miejscu</a><br><br>
 					</div>
 					<div id="main_event_desc">
 						<p><?php echo $desc;?></p>
@@ -208,7 +215,7 @@
 								<?php if($idU < 0){
 									echo '<input name="author" placeholder="Anonim" class="author-comment">';
 								}?>
-								<textarea name="content" placeholder="Napisz komentarz..."></textarea>
+								<textarea name="content" placeholder="Co myślisz o tym miejscu..."></textarea>
 								<input type="hidden" name="type" value="2">
 								<input type="hidden" name="id_item" id="id_item" value="<?php echo $id; ?>">
 							</form>
@@ -280,6 +287,21 @@
 			});
 		</script>
 		<script>
+			$(document).ready(function(){
+				showMoreEventsInPlace();
+			});
+		</script>
+		<script>
+		var countOfShowEvents = 0;
+		function showMoreEventsInPlace(){
+			for(i=0; i < 2; i++){
+				$('.events-in-place-placepage .event').eq(countOfShowEvents).show();
+				countOfShowEvents++;
+			}
+			if($('.events-in-place-placepage .event').length == $('.events-in-place-placepage .event:visible').length){
+				$(".more-event").hide();
+			}
+		}
 		</script>
 	</body>
 </html>	

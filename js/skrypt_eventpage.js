@@ -67,7 +67,7 @@ function updateShowEvent(){
 			$(this).hide();
 		}
 	});
-	if(showOtherEvent == $('.other-ev-in-place .event').length){
+	if(showOtherEvent >= $('.other-ev-in-place .event').length){
 		$(".more-event").hide();
 	}
 }
@@ -79,7 +79,7 @@ function updateShowEventinCat(){
 			$(this).hide();
 		}
 	});
-	if(showOtherEventinCat == $('.other-ev-in-cat .event-in-same-cat').length){
+	if(showOtherEventinCat >= $('.other-ev-in-cat .event-in-same-cat').length){
 		$(".more-event-incat").hide();
 	}
 }

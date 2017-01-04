@@ -1,3 +1,4 @@
+
 function add_comment(){
 	$('.loading-panel').show();
 	$.ajax({
@@ -8,6 +9,7 @@ function add_comment(){
 	   {
 			refresh_comment($("#id_item").val());
 			$("#addNewComment textarea").val("");
+			$("#addNewComment .author-comment").val("");
 	   }
 	});
 }
@@ -58,6 +60,28 @@ function refresh_comment(id){
 $(document).ready(function(){
 	showMoreComments();
 });
+
+function showReCommentForm(obj){
+	$(obj).parent().next('.re-for-comment').show();
+}
+
+var scrollPosition = -1;
+function add_re_comment(obj){
+	scrollPosition = $(document).scrollTop();
+	$('.loading-panel').show();
+	var form = $(obj).prev('form');
+	$.ajax({
+	   type: "GET",
+	   url: "addComment.php",
+	   data: form.serialize(),
+	   success: function(data)
+	   {
+		   commentId = data;
+		   refresh_comment($("#id_item").val());
+		   form.children("textarea").val("");
+	   }
+	});
+}
 
 var countOfShownComment = 0;
 function showMoreComments(step){

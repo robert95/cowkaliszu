@@ -1,3 +1,4 @@
+
 var commentId = -1;
 function add_comment(){
 	$('.loading-panel').show();
@@ -138,7 +139,7 @@ function add_re_comment(obj){
 	   {
 		   commentId = data;
 		   refresh_comment($("#id_item").val());
-		   form.children(" textarea").val("");
+		   form.children("textarea").val("");
 	   }
 	});
 }
@@ -168,7 +169,6 @@ function showMoreComments(step){
 
 var scrollPosition = -1;
 function backToScrollPosition(){
-	console.log(scrollPosition);
 	if(scrollPosition != -1){
 		$(document).scrollTop(scrollPosition);
 		scrollPosition = -1;

@@ -199,11 +199,11 @@
 #place-desc-hours-time p.desc-field{    
 	font-size: 19px !important;
 }
-#place-desc-fileds .desc-field .show-contact{    
+#place-desc-fileds .desc-field .show-contact, #place-desc-fileds .desc-field  a{    
 	color: #00AFB4 !important;
 	cursor: pointer;
 }
-.show-contact:hover{    
+.show-contact:hover, #place-desc-fileds .desc-field  a:hover{    
 	text-decoration: underline;
 }
 #place-desc-fileds .desc-field  .hidden-contact{
@@ -216,7 +216,7 @@
 }
 #rating-result-container .main-average{
 	font-size: 40px;
-	max-width: 50%;
+	max-width: 52%;
 	display: inline-block;
 }
 #rating-result-container .main-average span{

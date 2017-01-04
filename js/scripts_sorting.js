@@ -2,7 +2,7 @@ function sortById(){
 	var elems = $('.event').sort(function (a, b) {
 		var contentA = parseInt( $(a).attr('data-id'));
 		var contentB = parseInt( $(b).attr('data-id'));
-		return (contentA < contentB) ? 1 : (contentA > contentB) ? -1 : 0;
+		return (contentA > contentB) ? -1 : (contentA < contentB) ? 1 : 0;
 	});
 	$('.event-list-direct-cont').html(elems);
 } 

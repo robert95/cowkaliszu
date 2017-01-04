@@ -40,8 +40,8 @@
 			$id_place = addslashes($_POST['placeId']);
 			$hoursFromPlace = addslashes($_POST['time-from-place']) == 1;
 			
-			if($_POST['img'] && $_POST['img'] != ""){
-				$img = savePhotoFromBase64($name, addslashes($_POST['img']));
+			if($_FILES['img']){
+				$img = savePhotoFromBlob($name, $_FILES['img']);
 				$thumb = saveThumbPhoto($name, $img, addslashes($_POST['imgWidth']));
 			}else{
 				if(addslashes($_POST['changeThumb'])){
@@ -88,7 +88,7 @@
 				//dodano poprawnie wydarzenia
 				$addComplete = true;
 			}else{
-				$id = intval($_GET['id']);
+				$id = intval($_POST['id']);
 				$data = $_POST['date'][0];
 				$time = $_POST['time'][0][0];
 				$data_end = $data;
@@ -99,6 +99,9 @@
 			}
 			$linkToEvent = linkToEvent($eventsIds[0]);
 			$linkToEdition = linkToEventEdition($eventsIds[0]);
+			$returnArr['linkToEvent'] = $linkToEvent;
+			$returnArr['linkToEdition'] = $linkToEdition;
+			echo json_encode($returnArr);die;
 		}else{
 			$isValid = false;
 		}
@@ -225,9 +228,10 @@
 	<body id="place-main-container">
 		<?php include 'menu.php'?>
 		<div id="top" class="place-page-container">			
-			<section id="container">
+			<section id="container" class="add_event_cont">
 				<input type="file" name="file" id="image" class="btn hide">
-				<form action="" id="place-add-form" method="post" onsubmit="return validateForm(event)">
+				<input type="hidden" name="img" id="img" value="<?php echo $imageBase64; ?>">
+				<form action="" id="place-add-form" method="post" enctype="multipart/form-data" onsubmit="return validateForm(event)">
 				<section id="top_events">		
 					<input type="hidden" name="id" id="place_id" value="<?php echo $id; ?>">
 					<input type="hidden" name="placeId" id="placeId" value="<?php echo $place['id']; ?>">
@@ -247,7 +251,6 @@
 							</ul>
 						</div>
 					</div>
-					<input type="hidden" name="img" id="img" value="<?php echo $imageBase64; ?>">
 					<input type="hidden" name="X" id="X" value="0"/>
 					<input type="hidden" name="Y" id="Y" value="0"/>
 					<input type="hidden" name="W" id="W" value="1000"/>
@@ -353,30 +356,26 @@
 				<a style="float: right; margin-right: 20px;" href="http:\\www.pinkelephant.pl"> Projekt www.pinkelephant.pl</a>
 			</div>
 		</footer>
-		<?php if($addComplete){
-			echo '<div id="confirm-adding-without-image" style="display:block !important;" class="cat-filter-container">
+		<div id="confirm-adding-without-image-1" class="cat-filter-container">
 			<div class="vertical-center-wrap">
 				<p class="center">
 					Dziękujemy<br>Twoje wydarzenie zostało poprawnie dodane
 					<br><br>
-					<a href="'.$linkToEvent.'" class="btn btn-red">Zobacz podgląd</a>
-					<a href="'.$linkToEdition.'" class="btn btn-add">Wróc do edycji</a>
+					<a href="#" class="linkToEvent btn btn-red">Zobacz podgląd</a>
+					<a href="#" class="linkToEdition btn btn-add">Wróc do edycji</a>
 				</p>
 			</div>
-		</div>';
-		}?>
-		<?php if($editComplete){
-			echo '<div id="confirm-adding-without-image" style="display:block !important;" class="cat-filter-container">
+		</div>
+		<div id="confirm-adding-without-image-2" class="cat-filter-container">
 			<div class="vertical-center-wrap">
 				<p class="center">
 					Dziękujemy<br>Twoje wydarzenie zostało poprawnie zedytowane
 					<br><br>
-					<a href="'.$linkToEvent.'" class="btn btn-red">Zobacz podgląd</a>
-					<a href="'.$linkToEdition.'" class="btn btn-add">Wróc do edycji</a>
+					<a href="#" class="linkToEvent btn btn-red">Zobacz podgląd</a>
+					<a href="#" class="linkToEdition btn btn-add">Wróc do edycji</a>
 				</p>
 			</div>
-		</div>';
-		}?>
+		</div>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 		<script src="https://maps.google.com/maps/api/js?key=AIzaSyDa4nN-bDVonpOyK5S7HAx23krp3ZBRLhE&sensor=false" type="text/javascript"></script>
 		<script type="text/javascript" src="js/skrypt_widget.js"></script>
@@ -525,7 +524,8 @@
 			}
 
 			function validateForm(event){
-				if(!isCorrectForm) event.preventDefault();
+				//if(!isCorrectForm) event.preventDefault();
+				event.preventDefault();
 				isCorrectForm = true;
 				validEventName();
 				validateDesc();
@@ -535,7 +535,28 @@
 				validateHoursFiled();
 				setTimeout(function(){
 					if(isCorrectForm){
-						$("#place-add-form").submit();
+						var base64ImageContent = $("#img").val().replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
+						var blob = base64ToBlob(base64ImageContent, 'image/png');  
+						
+						var formData = new FormData(document.forms[0]);
+						formData.append('img', blob);
+						var url = "add_event.php"; 
+						$(".full-loading-panel").show();
+						$.ajax({
+							url: url, 
+							type: "POST", 
+							cache: false,
+							contentType: false,
+							processData: false,
+							data: formData
+						}).done(function(data){
+							console.log(data);
+							var links = JSON.parse(data);
+							$(".linkToEvent").attr('href', links['linkToEvent']);
+							$(".linkToEdition").attr('href', links['linkToEdition']);
+							$(".full-loading-panel").hide();
+							$("#confirm-adding-without-image-1").show();
+						});
 					}else{
 						$("#correct-errors").show();
 					}

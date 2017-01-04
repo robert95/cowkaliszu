@@ -33,7 +33,7 @@
 				editRating($idR, $nameR, $id, 1);
 			}
 		}
-		deleteAllRatingFieldNotYetForParent($ratIds);
+		deleteAllRatingFieldNotYetForParent($ratIds, $id);
 		setOrder("rating", $ratIds);
 		//end ratings
 		//desc fileds	
@@ -56,8 +56,8 @@
 				}
 			}
 		}
-		deleteAllDescFieldNotYetForParent($descIds);
-		deleteAllStaticDescFieldNotYetForParent($descStaticIds);
+		deleteAllDescFieldNotYetForParent($descIds, $id);
+		deleteAllStaticDescFieldNotYetForParent($descStaticIds, $id);
 		setOrder("desc_field", $descIds);
 		//end descfileds
 		//filters

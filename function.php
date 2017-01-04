@@ -3,7 +3,7 @@
 	
 	function saveIconCategory($nazwakat)
 	{
-		$target_file = 'img/'.$nazwakat.'.png';
+		$target_file = 'upload/'.$nazwakat.'.png';
 		$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
 		if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif" ){
 			return 0;
@@ -34,7 +34,7 @@
 	
 	function saveMainImageEvent($id)
 	{
-		$target_file = 'img/em_'.$id.'.png';
+		$target_file = 'upload/em_'.$id.'.png';
 		/*$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
 		if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif" ){
 			return 0;
@@ -45,9 +45,16 @@
 	
 	function savePhotoFromBase64($name, $data){
 		$name = generatePhotoName($name);
-		$target_file = 'img/'.$name.'.png';
+		$target_file = 'upload/'.$name.'.png';
 		$data = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data));
 		file_put_contents($target_file, $data);
+		return $target_file;
+	}	
+	
+	function savePhotoFromBlob($name, $file){
+		$name = generatePhotoName($name);
+		$target_file = 'upload/'.$name.'.png';
+		move_uploaded_file($file["tmp_name"], $target_file);
 		return $target_file;
 	}
 	
@@ -57,23 +64,25 @@
 	}
 	
 	function saveThumbPhoto($name, $image, $width){
-		$targ_w = $targ_h = 300;
+		$targ_w = $targ_h = 400;
 		$jpeg_quality = 9;
 		$name = generatePhotoName($name);
-		$target_file = 'img/'.$name.'.png';
+		$target_file = 'upload/'.$name.'.png';
 		$img_r = imagecreatefromstring(file_get_contents($image));
 		$x = $_POST['X'];
 		$y = $_POST['Y'];
 		$w = $_POST['W'];
 		$realW = imagesx($img_r);
 		$realY = imagesy($img_r);
+		$w_pom = 650;
+		$h_pom = intval(($realW*$realY)/$realW);
 		if(intval($w) > 651){
-			if($realW > $realY){
+			if($realW >= $realY){
 				$x = intval((650 - ((650*$realY)/$realW))/2);
 				$y = 0;
 				$w = intval(650 - $x*2);
 			}else{
-				$y = intval(($realY - 650)/2);
+				$x = intval(($h_pom - ((650*$realY)/$realW))/2);
 				$x = 0;
 				$w = 650;
 			}
@@ -83,6 +92,7 @@
 		$y *= $p;
 		$w *= $p;
 		
+		//die;
 		$dst_r = ImageCreateTrueColor( $targ_w, $targ_h );
 		imagecopyresampled($dst_r,$img_r,0,0,$x,$y,
 			$targ_w,$targ_h,$w,$w);
@@ -94,7 +104,7 @@
 	{
 		$targ_w = $targ_h = 300;
 		$jpeg_quality = 9;
-		$target_file = 'img/e_'.$id.'.png';
+		$target_file = 'upload/e_'.$id.'.png';
 		
 		$img_r = imagecreatefromstring(file_get_contents($image));
 		

@@ -397,7 +397,30 @@ function validateForm(event){
 	}
 	setTimeout(function(){
 		if(isCorrectForm){
-			$("#place-add-form").submit();
+			//$("#place-add-form").submit();
+			
+			var base64ImageContent = $("#img").val().replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
+			var blob = base64ToBlob(base64ImageContent, 'image/png');  
+			
+			var formData = new FormData(document.forms[0]);
+			formData.append('img', blob);
+			var url = "edytuj-miejsce.php"; 
+			$(".full-loading-panel").show();
+			$.ajax({
+				url: url, 
+				type: "POST", 
+				cache: false,
+				contentType: false,
+				processData: false,
+				data: formData
+			}).done(function(data){
+				console.log(data);
+				var links = JSON.parse(data);
+				$(".linkToEvent").attr('href', links['linkToEvent']);
+				$(".linkToEdition").attr('href', links['linkToEdition']);
+				$(".full-loading-panel").hide();
+				$("#confirm-adding-without-image-1").show();
+			});
 		}
 	}, 200);
 }

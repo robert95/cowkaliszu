@@ -15,6 +15,7 @@
 	
 	$event = getEvent($conn, $id);
 	$place = getPlace($event['id_miejsce']);
+	$placeCat = getPlaceCat($place['id_kat']);
 	$kat = getCategoryName($conn, $event['id_kat']);
 	$kat_icon = getCategoryIcon($conn, $event['id_kat']);
 	
@@ -35,6 +36,8 @@
 	$link = linkToEvent($event["id"]);
 	$fblink = "https://co.wkaliszu.pl/".$link;
 	$per = 0;
+	
+	$author = getUserByIDnew($event['id_user']);
 	
 	if($event['cena'] != ""){
 		if($event['cena'] == "0") $price = "wstęp wolny";
@@ -88,6 +91,7 @@
 			}]
 			</script>
 		<link rel="stylesheet" type="text/css" href="style/style.css">
+		<link rel="stylesheet" type="text/css" href="style/place_css.css">
 		<style>
 			img[src="http://maps.gstatic.com/mapfiles/api-3/images/mapcnt6.png"] {
 				display: none !important;
@@ -118,9 +122,9 @@
 						</div>
 						<div class="mainevent_desc">
 						    <div class="mainevent-title-box eventpage_desc">
-								<img src="<?php echo $kat_icon; ?>" alt="<?php echo $kat; ?>"/> <span><?php echo $kat; ?></span>
+								<span><?php echo $kat; ?></span>
 							    <img src="img/fb.png" alt="Udostępnij" id="fbshare"/>
-								<p class="add-to-like-box"><span>Dodaj<br>do schowka</span><img src="img/add_to_fav.png" alt="Dodaj do ulubionych" data-id="<?php echo $event['id']; ?>" id="main-like-icon" class="liked_icon" style="cursor:pointer;"/></p>
+								<p class="add-to-like-box"><span>Obserwuj<br>to wydarzenie</span><img src="img/add_to_fav.png" alt="Dodaj do ulubionych" data-id="<?php echo $event['id']; ?>" id="main-like-icon" class="liked_icon" style="cursor:pointer;"/></p>
 							</div>
 							<div class="mainevent-info-box">
 								<div>
@@ -133,74 +137,106 @@
 									<?php echo getDatesOfEvent($event['id']); ?>
 								</div>
 							</div>
-							<!--<p style="float:right;">
-								<?php echo $place['nazwa']; ?><br>
-								<?php echo $readyData ?> | <?php echo $readyTime; ?><br>
-							</p>
-							<img src="<?php echo $kat_icon; ?>" alt="<?php echo $kat; ?>"/> <span><?php echo $kat; ?></span>
-							<h2><?php echo $event['nazwa']; ?></h2>-->
-							<!--<table>
-								<tr>
-									<td><img src="img/views.png" alt="Widziało: "/><?php echo $event['widzow']; ?></td>
-									<td><img src="img/comments.png" alt="Komentarzy: "/><?php echo $event['komentarzy']; ?></td>
-									<td style="padding-right: 10px;"><img src="img/favourite.png" alt="Ulubione: "/><?php echo $event['ulubione']; ?></td>
-									<td><img src="img/add_to_fav.png" alt="Dodaj do ulubionych" data-id="<?php echo $event['id']; ?>" onClick="add_to_like(<?php echo $event['id']; ?> , this);" class="liked_icon" style="cursor:pointer;"/> <div class="fb-share-button" data-href="<?php echo $fblink; ?>" data-layout="icon"></div></td>
-								</tr>
-							</table>-->
 						</div>
 					</div>
 					<div id="event_right">
 						<img src="img/goToMap.png" onclick="location.href='mapa.php'" alt="Otwórz mapę" id="goToBigMap">
-						<?php /*<div id="reminder">
-							<p><img src="img/remind.png" alt="Ustaw przypomnienie"/> Ustaw przypomnienie</p>
-							*/?><?php /*if(!$zalogowany) echo '<div id="login_panel_rem">
-								<p>Aby ustawić przypomnienie zaloguj się: </p>
-								<table>
-								<form action="" method="post">
-								Login:<br>
-								<input type="text" name="login" id="login"/><br>
-								Hasło:<br>
-								<input type="password" name="pass" id="pass"/><br>
-								<div><input class="btn" type="button" name="submit" id="tryLogin" value="Zaloguj"/></div>
-								</form>
-							</table>
-							<p id="infoLogin" style="display:none;"></p></div>';
-							*/?>
-							<?php /*<div id="remineder_panel">
-								<table>
-									<tr>
-										<td><div id="div_rem1" class="rem"><img src="img/reminder.png" alt="Ustaw godzinę" class="temp" id="rem1" data-time="2"/></div></td>
-										<td><div id="div_rem2" class="rem"><img src="img/reminder.png" alt="Ustaw godzinę" class="temp" id="rem2" data-time="2"/></div></td>
-									</tr>
-									<tr>
-										<td><img src="img/nochecked.png" data-check="0" id="SMSRemaind" alt="Przypomnienie sms" class="check_img"/> sms</td>
-										<td><img src="img/nochecked.png" data-check="0" id="MAILRemaind" alt="Przypomnienie e-mail" class="check_img"/> e-mail</td>
-									</tr>
-								</table>
-								<p id="saveRemaind">zapisz</p>
-							</div>
-						</div>*/?>
 						<div id="event_on_map"  style="height: 500px;"></div>
 						<div id="place-more-info">
-							<div class="place-header">
-								<img src="img/markerE.png" alt="<?php echo $place['nazwa']; ?>">
-								<p class="place-name"><?php echo $place['nazwa']; ?></p>
-								<p class="place-adress"><?php echo $place['adres']; ?></p>
+							<?php 
+								$linkToPlace = getLinkToPlace($place["id"], $place['nazwa']);
+								$thumb = $place['thumb'] == "" ? $placeCat['thumb']: $place['thumb'];
+								$isOpen = "Otwarte";
+								$isOpenClass= "open-place";
+								$avgRating = number_format((float)getGlobalRatingValAvgForPlace($place["id"]), 2, ',', '');
+								$hasOpenHours = false;
+								$openHours = [];
+								$idFieldOpenHours = -1;
+								if($placeCat != null){
+									foreach(getStaticFieldForParent($placeCat['id'], 1) as $d){
+										if($d['id_field'] == 4){
+											$hasOpenHours = true;
+											$idFieldOpenHours = $d['id'];
+										}
+									}
+								}
+								if($hasOpenHours){
+									$openHours = getDescFieldVal($idFieldOpenHours, 0, $place['id'], 1);
+									$openHours = json_decode($openHours[0]['value']);
+									$nowWeekDay = date('w');
+									$nowWeekDay = $nowWeekDay != 0 ? $nowWeekDay-1 : $nowWeekDay = 6;
+									$nowHour = date('H:i');
+									if($openHours[$nowWeekDay*2] == "" || !($openHours[$nowWeekDay*2] <= $nowHour && $nowHour <= $openHours[$nowWeekDay*2+1])){
+										$isOpen = "Nieczynne";
+										$isOpenClass= "closed-place";
+									}
+								}
+							?>
+							<a href="<?php echo $linkToPlace; ?>"><img src="<?php echo $place['thumb']; ?>" alt="<?php echo $place['nazwa']; ?>" class="image"></a>
+							<div class="pep_more-info">
+								<div class="place-header">
+									<p class="place-cat-name"><?php echo $placeCat['name']; ?></p>
+									<p class="place-name"><a href="<?php echo $linkToPlace; ?>"><?php echo $place['nazwa']; ?></a></p>
+									<p class="place-adress"><?php echo $place['adres']; ?></p>
+								</div>
+								<div class="place-info-on-event">
+									<p class="pep_now-open <?php echo $isOpenClass; ?>">Teraz: <?php echo $isOpen; ?></p>
+									<div class="pep_open-hours">
+									<?php 
+										if($hasOpenHours){
+											echo '<p>Godziny otwarcia:</p>
+											<table>
+												<tr>
+													<td>Poniedziałek</td>';
+													if($openHours[0] != "") echo '<td>'.$openHours[0].' - '.$openHours[1].'</td>';
+													else echo '<td class="closed-place"><span>Nieczynne</span></td>';
+											echo'</tr>
+												<tr>
+													<td>Wtorek</td>';
+													if($openHours[2] != "") echo '<td>'.$openHours[2].' - '.$openHours[3].'</td>';
+													else echo '<td class="closed-place"><span>Nieczynne</span></td>';
+											echo'</tr>
+												<tr>
+													<td>Środa</td>';
+													if($openHours[4] != "") echo '<td>'.$openHours[4].' - '.$openHours[5].'</td>';
+													else echo '<td class="closed-place"><span>Nieczynne</span></td>';
+											echo'</tr>
+												<tr>
+													<td>Czwartek</td>';
+													if($openHours[6] != "") echo '<td>'.$openHours[6].' - '.$openHours[7].'</td>';
+													else echo '<td class="closed-place"><span>Nieczynne</span></td>';
+											echo'</tr>
+												<tr>
+													<td>Piątek</td>';
+													if($openHours[8] != "") echo '<td>'.$openHours[8].' - '.$openHours[9].'</td>';
+													else echo '<td class="closed-place"><span>Nieczynne</span></td>';
+											echo'</tr>
+												<tr>
+													<td>Sobota</td>';
+													if($openHours[10] != "") echo '<td>'.$openHours[10].' - '.$openHours[11].'</td>';
+													else echo '<td class="closed-place"><span>Nieczynne</span></td>';
+											echo'</tr>
+												<tr>
+													<td>Niedziela</td>';
+													if($openHours[12] != "") echo '<td>'.$openHours[12].' - '.$openHours[13].'</td>';
+													else echo '<td class="closed-place"><span>Nieczynne</span></td>';
+													echo'<td></td>
+													<td></td>
+												</tr>
+											</table>';
+										}
+									?>
+									</div>
+									<p class="pep_avg">Średnia ocen: <strong><?php echo $avgRating; ?></strong></p>
+								</div>
 							</div>
-							<p>
-								tel.: 62-759-75-57<br>
-								strona.: <a href="www.teatr.pl">www.teatr.pl</a><br><br>
-								Godziny otwarcia:<br>
-								pon. - ndz. 7:30-22:00
-							</p>
-							<img src="img/place_main.png" alt="Teatr" class="image">
 						</div>
 					</div>
 					<div id="main_event_desc">
 						<p><?php echo nl2br($event['opis']); ?></p>
-						<?php if($event['www'] != "") echo '<h6>Strona wydarzenia: <a href='.$event['www'].'>'.$event['www'].'</a></h6>'; ?>
+						<?php if($event['www'] != "") echo '<h6>Strona wydarzenia: <a href=http://'.$event['www'].'>'.$event['www'].'</a></h6>'; ?>
 						<?php if($yt != "") echo '<iframe width="560" height="315" src="https://www.youtube.com/embed/'.$yt.'" frameborder="0" allowfullscreen></iframe>'; ?>
-						<h6 class="event-author">Dodane przez: <?php echo getUserLogin($event['id_user']);?></h6>
+						<h6 class="event-author">Dodane przez: <?php echo $author['login']; ?></h6>
 					</div>
 				</section>
 				<section class="event-comments">
@@ -209,7 +245,10 @@
 							<img src="img/bigavatar.png" alt="nick">
 						</div>
 						<div class="add-comment-form">
-							<form id="addNewComment">
+							<form id="addNewComment">								
+								<?php if($zalogowany == 0){
+									echo '<input name="author" placeholder="Anonim" class="author-comment">';
+								}?>
 								<textarea name="content" placeholder="Napisz komentarz..."></textarea>
 								<input type="hidden" name="type" value="1">
 								<input type="hidden" name="id_item" id="id_item" value="<?php echo $event['id']; ?>">

@@ -30,8 +30,8 @@
 		$opis = addslashes($_POST['opis']);
 		$adress = addslashes($_POST['adress']);
 		
-		if($_POST['img'] && $_POST['img'] != ""){
-			$img = savePhotoFromBase64($name, addslashes($_POST['img']));
+		if(isset($_FILES['img']) && $_FILES['img']["tmp_name"] != ""){
+			$img = savePhotoFromBlob($name, $_FILES['img']);
 			$thumb = saveThumbPhoto($name, $img, addslashes($_POST['imgWidth']));
 		}else{
 			if(addslashes($_POST['changeThumb'])){
@@ -98,6 +98,11 @@
 				deleteAllFieldValForFilterWithoutThis($f, $id, 1);
 			}
 		}
+		$linkToEvent = getLinkToPlaceById($id);
+		$linkToEdition = linkToPlaceEdition($id);
+		$returnArr['linkToEvent'] = $linkToEvent;
+		$returnArr['linkToEdition'] = $linkToEdition;
+		echo json_encode($returnArr);die;
 	}
 	
 	if(!(isset($_GET['id']))){
@@ -114,6 +119,11 @@
 		$id = $_GET['id'];
 		$place = getPlace($id);
 		$image = $place['img'];
+		if($image != ''){
+			$type = pathinfo($image, PATHINFO_EXTENSION);
+			$data = file_get_contents($image);
+			$imageBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+		}
 		$id_kat = $place['id_kat'];
 		$thumb = $place['thumb'];
 		$name = $place['nazwa'];
@@ -145,16 +155,16 @@
 	<body id="place-main-container">
 		<?php include 'menu.php'?>
 		<div id="top" class="place-page-container">			
-			<section id="container">
+			<section id="container" class="add_event_cont">
 				<input type="file" name="file" id="image" class="btn hide">
-				<form action="" id="place-add-form" method="post" onsubmit="return validateForm(event)">
+				<input type="hidden" name="img" id="img" value="<?php echo $imageBase64; ?>">
+				<form action="" id="place-add-form" method="post" enctype="multipart/form-data" onsubmit="return validateForm(event)">
 				<section id="top_events">		
 					<input type="hidden" name="id" id="place_id" value="<?php echo $id; ?>">
 					<h1 id="event_id" data-id="<?php echo $id; ?>"><?php echo ($id>0) ? 'Edycja': 'Dodawanie';?> miejsca</h1>
 					<div id="event_right">
 						<div id="place_on_map" style="height: 500px;"></div>
 					</div>
-					<input type="hidden" name="img" id="img" value="">
 					<input type="hidden" name="X" id="X" value="0"/>
 					<input type="hidden" name="Y" id="Y" value="0"/>
 					<input type="hidden" name="W" id="W" value="100"/>
@@ -237,6 +247,19 @@
 					<button class="btn btn-cancel" id="back-to-add-image" onclick="hidePhotoWarning()">Nie</button>
 				</p>
 			</div>
+		</div>
+		<div id="confirm-adding-without-image-1" class="cat-filter-container">
+			<div class="vertical-center-wrap">
+				<p class="center">
+					Dziękujemy<br>Twoje miejsce zostało poprawnie dodane
+					<br><br>
+					<a href="#" class="linkToEvent btn btn-red">Zobacz podgląd</a>
+					<a href="#" class="linkToEdition btn btn-add">Wróc do edycji</a>
+				</p>
+			</div>
+		</div>
+		<div class="loading-panel full-loading-panel">
+			<img src="img/loading.gif" alt="Ładowanie">
 		</div>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 		<script src="https://maps.google.com/maps/api/js?key=AIzaSyDa4nN-bDVonpOyK5S7HAx23krp3ZBRLhE&sensor=false" type="text/javascript"></script>

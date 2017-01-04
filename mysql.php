@@ -589,6 +589,19 @@
 		while($row = $result->fetch_assoc()) {		
 			return $row;
 		}
+	}	
+	
+	function getUserByIDnew($id)
+	{
+		$conn = sqlConnect();
+		$query="SELECT * FROM `users` WHERE `id` = ".$id."";
+		$result=$conn->query($query);
+		$user = null;
+		while($row = $result->fetch_assoc()) {		
+			$user = $row;
+		}
+		sqlClose($conn);
+		return $user;
 	}
 	
 	function getUserLogin($mh){		
@@ -997,6 +1010,10 @@
 		return 'add_event.php?id='.$id;
 	}
 	
+	function linkToPlaceEdition($id){
+		return 'edytuj-miejsce.php?id='.$id;
+	}
+	
 	function notPolishLink($url){
 		$url = substr($url, 0, 80);
 		$aWhat = array('ą', 'ć', 'ę', 'ł', 'ń', 'ó', 'ś', 'ż', 'ź', 'Ą', 'Ć', 'Ę', 'Ł', 'Ń', 'Ó', 'Ś', 'Ż', 'Ź');
@@ -1008,7 +1025,7 @@
 		$conn = sqlConnect();
 		$wyj = "";
 		
-		$query="SELECT * FROM `wydarzenia` WHERE `id_miejsce` = $id_place AND CURRENT_DATE <= `data_end` AND `id` <> $id_event ORDER BY `data` ASC, `czas` ASC";
+		$query="SELECT * FROM `wydarzenia` WHERE `id_miejsce` = $id_place AND CURRENT_DATE <= `data_end` AND `id` <> $id_event AND `poczekalnia` = 0 ORDER BY `data` ASC, `czas` ASC";
 		
 		$result=$conn->query($query);
 		$wyj="";
@@ -1030,9 +1047,50 @@
 	
 			$liked_icon = isLiked($e["id"], $conn) == 0?'img/add_to_fav.png':'img/del_to_fav.png';
 			$wyj .= '<div class="event" data-id="'.$e['id'].'">
-						<div class="ev_th thumb_event" onclick="location.href=\''.$link.'\'"><img src="'.$e['miniatura'].'" alt="'.$e['nazwa'].'" onload="fitThumbSize();"/></div>
+						<div class="ev_th thumb_event" onclick="location.href=\''.$link.'\'"><img src="'.$e['miniatura'].'" alt="'.$e['nazwa'].'"/></div>
 						<div class="event_desc">
-							<div class="event-day-cat"><img src="'.$kat["obrazek"].'" alt="'.$kat["nazwa"].'"/><span> '.$kat["nazwa"].'</span></div>
+							<div class="event-day-cat"><span> '.$kat["nazwa"].'</span></div>
+							<h4><a href="'.$link.'">'.$e['nazwa'].'</a></h4>
+							<h5>'.$place['nazwa'].'</h5>
+							<h6>g. '.substr($e['czas'], 0, 5).' <span class="price_separator"> | </span> '.$price.'</h6>
+							<p class="more-event-data">'.$weekDay.', '.$polishDate.'</p>
+						</div>
+					</div>';
+			$i++;				
+		}
+		
+		sqlClose($conn);
+		return $wyj;
+	}
+	
+	function getEventInPlacePage($id_place){
+		$conn = sqlConnect();
+		$wyj = "";
+		
+		$query="SELECT * FROM `wydarzenia` WHERE `id_miejsce` = $id_place AND CURRENT_DATE <= `data_end` AND `poczekalnia` = 0 ORDER BY `data` ASC, `czas` ASC";
+		
+		$result=$conn->query($query);
+		$wyj="";
+		$i = 1;
+		while($e = $result->fetch_assoc()) {
+			$kat = getCategory($conn, $e["id_kat"]);
+			$place = getPlace($e["id_miejsce"]);
+            $link = linkToEvent($e["id"]);
+			
+			if($e['cena'] != ""){
+				if($e['cena'] == "0") $price = "wstęp wolny";
+				else $price = "Od ".$e['cena']." zł";
+			}else $price = "";	
+			
+			$temp_date = strtotime( $e['data'] );
+			$dayInWeek = date( 'N', $temp_date );
+			$weekDay = getFullPolishDayName($dayInWeek);
+			$polishDate = convertToCoolDate($e['data']);
+	
+			$liked_icon = isLiked($e["id"], $conn) == 0?'img/add_to_fav.png':'img/del_to_fav.png';
+			$wyj .= '<div class="event" data-id="'.$e['id'].'">
+						<div class="ev_th thumb_event" onclick="location.href=\''.$link.'\'"><img src="'.$e['miniatura'].'" alt="'.$e['nazwa'].'"/></div>
+						<div class="event_desc">
 							<h4><a href="'.$link.'">'.$e['nazwa'].'</a></h4>
 							<h5>'.$place['nazwa'].'</h5>
 							<h6>g. '.substr($e['czas'], 0, 5).' <span class="price_separator"> | </span> '.$price.'</h6>
@@ -1050,7 +1108,7 @@
 		$conn = sqlConnect();
 		$wyj = "";
 		
-		$query="SELECT * FROM `wydarzenia` WHERE `id_kat` = $id_kat AND CURRENT_DATE <= `data_end` AND `id` <> $id_event ORDER BY `data` ASC, `czas` ASC";
+		$query="SELECT * FROM `wydarzenia` WHERE `id_kat` = $id_kat AND CURRENT_DATE <= `data_end` AND `id` <> $id_event AND `poczekalnia` = 0 ORDER BY `data` ASC, `czas` ASC";
 		
 		$result=$conn->query($query);
 		$wyj="";
@@ -1072,9 +1130,9 @@
 	
 			$liked_icon = isLiked($e["id"], $conn) == 0?'img/add_to_fav.png':'img/del_to_fav.png';
 			$wyj .= '<div class="event event-in-same-cat" data-id="'.$e['id'].'">
-						<div class="ev_th thumb_event" onclick="location.href=\''.$link.'\'"><img src="'.$e['miniatura'].'" alt="'.$e['nazwa'].'" onload="fitThumbSize();"/></div>
+						<div class="ev_th thumb_event" onclick="location.href=\''.$link.'\'"><img src="'.$e['miniatura'].'" alt="'.$e['nazwa'].'"/></div>
 						<div class="event_desc">
-							<div class="event-day-cat"><img src="'.$kat["obrazek"].'" alt="'.$kat["nazwa"].'"/><span> '.$kat["nazwa"].'</span></div>
+							<div class="event-day-cat"><span> '.$kat["nazwa"].'</span></div>
 							<h4><a href="'.$link.'">'.$e['nazwa'].'</a></h4>
 							<h5>'.$place['nazwa'].'</h5>
 							<h6>g. '.substr($e['czas'], 0, 5).' <span class="price_separator"> | </span> '.$price.'</h6>
@@ -1108,7 +1166,14 @@
 			array_push($distArr, getDistanceFromLatLonInKm($x1,$y1,$e["x"],$e["y"]));
 		}
 		
-		for($i = 0; $i < 3; $i++){
+		$countOfPlaces = count($idArr) > 3 ? 3 : count($idArr);
+		
+		if($countOfPlaces == 0){
+			sqlClose($conn);
+			return "";
+		}
+		
+		for($i = 0; $i < $countOfPlaces; $i++){
 			$maxs = array_keys($distArr, min($distArr));
 			$idP = $idArr[$maxs[0]];
 			unset($distArr[$maxs[0]]);
@@ -1529,6 +1594,7 @@
 			}
 		}else{
 			$admin = false;
+			$loggedUser['id'] = 0;
 		}
 		
 		if($loggedUser['id']) $loggedUserID = $loggedUser['id'];
@@ -1538,8 +1604,10 @@
 		$result=$conn->query($query);
 		$wyj="";
 		while($c = $result->fetch_assoc()) {
+			$childComments = getCommentForParentInArray($c['id']);
+			$author = $c['author'] == false ? 'Anonim' :  $c['author'];
 			if($c['id_user'] == -1){
-				$user = [ "avatar" => "img/bigavatar.png", "login" => "Anonim" ];
+				$user = [ "avatar" => "img/bigavatar.png", "login" => $author ];
 				$owner = false;
 			}else{
 				$user = getUserByID($c['id_user'], $conn);
@@ -1559,13 +1627,26 @@
 					$wyj .= '<h5>'.$user['login'].'</h5>
 					<p>'.$c['content'].'</p>';
 					
+			$wyj .= '<p class="date-comment">'.$c['date'].'</p>';
 			if($admin) $wyj .= '<div class="editComment-panel"><form class="editComment">
 									<textarea class="edit-comment-field" name="content" placeholder="Napisz komentarz...">'.$c['content'].'</textarea>
 									<input type="hidden" name="id" value="'.$c['id'].'">
 								</form>
 								<button class="accept-btn" onclick="acceptEditComment(this);">zapisz</button></div>';
-				$wyj .= '</div>
-			</div>';
+				$wyj .= '</div>';
+			$wyj .= renderChildComment($childComments, $loggedUserID, $admin);
+			$wyj .= '<div class="re-comment"><button class="re-comment-btn btn" onclick="showReCommentForm(this);">Odpowiedz</button></div>';
+			$wyj .= '<div class="re-for-comment hide-on-start">
+						<form class="addNewChildComment">';
+			if($loggedUserID < 0) $wyj .= '<input name="author" placeholder="Anonim" class="author-comment">';
+			$wyj .= '		<textarea name="content" placeholder="Napisz komentarz..."></textarea>
+							<input type="hidden" name="id_parent" value="'.$c['id'].'">
+							<input type="hidden" name="type" value="2">
+							<input type="hidden" name="id_item" value="'.$id.'">
+						</form>
+						<button class="re-comment-btn btn" onclick="add_re_comment(this);">Wyślij</button>
+					</div>';
+			$wyj .= '</div>';
 		}
 		sqlClose($conn);
 		return $wyj;
@@ -2082,9 +2163,9 @@
 		sqlClose($conn);
 	}	
 	
-	function deleteAllRatingFieldNotYetForParent($arrayIds){
+	function deleteAllRatingFieldNotYetForParent($arrayIds, $parent){
 		$conn = sqlConnect();
-		$sql = "DELETE FROM `rating` WHERE id NOT IN ( '" . implode($arrayIds, "', '") . "' )";
+		$sql = "DELETE FROM `rating` WHERE id_parent = $parent AND id NOT IN ( '" . implode($arrayIds, "', '") . "' )";
 		$conn->query($sql);
 		sqlClose($conn);
 	}	
@@ -2232,9 +2313,9 @@
 		sqlClose($conn);
 	}
 		
-	function deleteAllDescFieldNotYetForParent($arrayIds){
+	function deleteAllDescFieldNotYetForParent($arrayIds, $parent){
 		$conn = sqlConnect();
-		$sql = "DELETE FROM `desc_field` WHERE id NOT IN ( '" . implode($arrayIds, "', '") . "' )";
+		$sql = "DELETE FROM `desc_field` WHERE  id_parent = $parent AND id NOT IN ( '" . implode($arrayIds, "', '") . "' )";
 		$conn->query($sql);
 		sqlClose($conn);
 	}
@@ -2273,9 +2354,9 @@
 		sqlClose($conn);
 	}	
 	
-	function deleteAllStaticDescFieldNotYetForParent($arrayIds){
+	function deleteAllStaticDescFieldNotYetForParent($arrayIds, $parent){
 		$conn = sqlConnect();
-		$sql = "DELETE FROM `static_desc_field` WHERE id_field NOT IN ( '" . implode($arrayIds, "', '") . "' )";
+		$sql = "DELETE FROM `static_desc_field` WHERE  id_parent = $parent AND id_field NOT IN ( '" . implode($arrayIds, "', '") . "' )";
 		$conn->query($sql);
 		sqlClose($conn);
 	}
@@ -2351,7 +2432,7 @@
 	
 	function getPlacesFromCat($id_cat){
 		$conn = sqlConnect();
-		$query="SELECT * FROM `miejsce` WHERE `id_kat`=$id_cat";
+		$query="SELECT * FROM `miejsce` WHERE `id_kat`=$id_cat ORDER BY `id` DESC";
 		$result=$conn->query($query);
 		$res = [];
 		while($c = $result->fetch_assoc()) {
@@ -2363,7 +2444,7 @@
 	
 	function getAllPlaces(){
 		$conn = sqlConnect();
-		$query="SELECT * FROM `miejsce`";
+		$query="SELECT * FROM `miejsce` ORDER BY `nazwa`";
 		$result=$conn->query($query);
 		$res = [];
 		while($c = $result->fetch_assoc()) {
@@ -2466,6 +2547,12 @@
 	}
 	
 	function getLinkToPlace($id, $name){
+		return "miejsce/".$id.'-'.makeSlug($name).".html";
+	}	
+	
+	function getLinkToPlaceById($id){
+		$place = getPlace($id);
+		$name = $place['nazwa'];
 		return "miejsce/".$id.'-'.makeSlug($name).".html";
 	}
 	/*END PLACES*/

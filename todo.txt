@@ -15,23 +15,60 @@
 - walidacja dodawania wydarzenia po stronie serweru
 - naprawa błędów z komentarzami
 - jak nie ma żadnego komentarza i dodajemy jako piersi to jak dodamy dwa na raz to wyświetli tylko 1
-
-- wydarzenia dodają się x razy - IMPORTANT!
-- gdy dodajemy grupę, zdjęcie uploadujemy tylko raz - IMPORTANT!
+- miniatura źle się zapisuje, gdy nie ustawimy jej w stronie klienta
+- ogarnąć kolor turkusowy
+- sekcji „Wydarzenia w tym samym miejscu“ dodają się chyba niezatwierdzone wydarzenia
 - ogarnąć podstonę wydarzenie(te wszystkie wydarzenie z tej kategorii itd ) i info o miejscu z prawej
-- ogarnąć podstonę miejsca (najbliższe wydarzenia w tym miejscu czy jakos tak)
-- dodanie miejsca-przekierowanie na dodanie wydarzenia jak jest ustawione coś w linku
-- edycja grupy wydarzenia
+Wydarzenia
+1. Wszędzie zamiast „Dodaj do schowka” dajemy „Obserwuj”.
+2. Przy nazwie kategorii nie robimy ikonek (rezygnujemy zupełnie z ikonek).
+3. Większy odstęp pomiędzy tytułem a miejscem.
+4. W treści wydarzenia większe odstępy pomiędzy wierszami (w projekcie jest 25pt).
+5. Większy odstęp pomiędzy treścią a informacją o autorze.
+6. Treść wyrównana do lewej, w tej samej linii, co informacje podstawowe.
+8. W wydarzeniach powiązanych też nie dajemy ikonek.
+2. Adres strony interaktywny.
+7. Komentarze.
+- ostatnio dodane miejsca w odwrotnej kolejnosći
+MIEJSCA
+1. Nazwa kategorii wyrównana w pionie względem turkusowego paska.
+2. Adres strony interaktywny.
+3. Wynik o ceny po prawej stronie napisu „Średnia ocen:”.
+4. Treść wyrównana do lewej, w tej samej linii, co informacje podstawowe.
+5. W treści wydarzenia większe odstępy pomiędzy wierszami (w projekcie jest 25pt).
+6. Komentarze.
+7. Najbliższe wydarzenia w tym miejscu.
+- lista wyboru miejsca przed dodaniem wydarzenie powinna być w pełni alfabetycznie
+- ekran po dodaniu miejsca/kategorii miejsca - tak jak w wydarzeniach
 - odpowiedzi na komentarze w wydarzeniach
-- komentarze bez oceny(?)
-- gdy w dany dzień miejsce jest zamknięte, a jest zaznaczoa zależność od godzin miejsca, musi ręcznie podać godziny
-- reszta rzeczy z maila od słonia
+- loading na dodawaniu miejsca
+- coś się wysypuje gdy nie ma miejsc w najbliższych knajpach
+- przy edycji miejsca tracimy zdjecie!
 
+- paulina musi mieć na weselu flachę z wodą i pić wodę trollujac całą rodzinę 
+
+- gwiazki!!!
+- ogarnąć trochę panel admina
+- gdy kliknie się dwa razy na dodaj wydarzenie/miejsce to przeładowuje strone
+- podczas edycji coś z miniaturą się psuje
+- gdy edytujemy ale nie zmieniamy zdjęcia to nie może się ponownie uploadować i tworzyć miniatury(w js przy dodawaniu pliku do formularza nie może, trzeba obwarunkować czy była zmiana zdjęcia)
+
+- zamiast base64 - blob - w wydarzenaich i miejscach zrobione, w kategoriach miejsc trzeba przerobić
+- zmianione zasady przy "zależne godziny otwarcia od godzin otwarcia miejsca"
+- dodanie miejsca-przekierowanie na dodanie wydarzenia jak jest ustawione coś w linku
+- gdy w dany dzień miejsce jest zamknięte, a jest zaznaczoa zależność od godzin miejsca, musi ręcznie podać godziny
+- trzeba też zrobić grupowe usuwanie wydarzeń
+- przy dodawaniu komentarza bez oceniania miejsca powinien dodać się komentarz ale zaznaczeniem że nie ma oceny albo w ogóle bez pojawiania się ocen (teraz pokazuje się że ktoś ocenił pośrodku)
+- nowy wybór kategorii
+- przycisk potwierdź w kalendarzu
+- edycja grupy wydarzeń
+
+- w odpowiedziach na komentarze, ukrywać część i przycisk "pokaż więcej"
+- zaczęła zmulać strona czasami. w przy wydarzeniach które mają dużo innych wydarzeń powiązanych chyba wgrywają się wszystkie te wydarzenia na stronie a potem ukrywają do trzech i to zmula dla przykładu - dorobić AJAXA
 - ogarnać uprawnienia
 - zabezpieczenie zapytań przed sql injection - php PDO
-- edycja grupy wydarzenia
 - zbiorowe wysyłanie jednego potwierdzenia po doddaniu wydarzenia
-- walidacja po stronie serwera - kilka dat, gdy jest źle to jest traci
-- przesień wszystko na smarty - to może na końcu
-
-
+- walidacja po stronie serwera - kilka dat, gdy jest źle to jest traci - tego chyba nie trzeba
+- przesień wszystko na smarty(może?)
+- poukładac to wszystko jakoś ładnie, z podziałem na pliki modele,widoki
+- obcersowwanie miejsc
