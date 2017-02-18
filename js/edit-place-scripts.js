@@ -168,7 +168,10 @@ function updateOpenHours(){
 $(".hours-field").keyup(updateOpenHours);
 
 function showOpenHours(){
-	var hours = JSON.parse($("#hours-field-input").val());
+	var hours = ["", "", "", "", "", "", "", "", "", "", "", "", "", ""];
+	if($("#hours-field-input").val() != ""){
+		hours = JSON.parse($("#hours-field-input").val());
+	}
 	var isOpenHours = false;
 	if(hours[0] != "" && hours[1] != ""){
 		$("#godzPonOd").val(hours[0]);
@@ -399,11 +402,12 @@ function validateForm(event){
 		if(isCorrectForm){
 			//$("#place-add-form").submit();
 			
-			var base64ImageContent = $("#img").val().replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
-			var blob = base64ToBlob(base64ImageContent, 'image/png');  
-			
 			var formData = new FormData(document.forms[0]);
-			formData.append('img', blob);
+			if(changeImage){
+				var base64ImageContent = $("#img").val().replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
+				var blob = base64ToBlob(base64ImageContent, 'image/png');  
+				formData.append('img', blob);
+			}
 			var url = "edytuj-miejsce.php"; 
 			$(".full-loading-panel").show();
 			$.ajax({

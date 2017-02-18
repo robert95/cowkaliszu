@@ -26,10 +26,9 @@
 	margin-top: -20px;
     margin-bottom: 20px;
 }
-#place-main-container #id_kat{
+#place-main-container #id_kat, .select-cat-label{
 	height: 31px;
 	margin: 6px auto;
-	/*width: 282px;*/
 	font-size: 20px;
 	padding: 0px 10px;
 	background: none;
@@ -40,6 +39,7 @@
 	cursor: pointer;
 	color: white;
 	padding-right: 20px;
+	top: 11px !important;
 }
 #place-main-container #id_kat_wrapper::after{
 	content: '';
@@ -88,11 +88,12 @@
     margin: 70px 0;
 }
 .place-page-container #place-filters label{
-	width: 20%;
+	width: 25%;
 	display: inline-block;
-	font-size: 20px;
+	font-size: 17px;
 	color: black;
 	cursor: pointer;
+	margin-bottom: 10px;
 }
 .place-page-container #place-filters label input{
 	vertical-align: top;
@@ -158,7 +159,7 @@
 .show-place-page #main_event_desc p{
 	font-size: 18px !important;
 	color: #1d1d1b !important;
-	width: 65%;
+	width: 62%;
 	text-align: justify;
 }
 .show-place-page  #place-filters p{
@@ -236,7 +237,7 @@
 	font-size: 16px;
 }
 .comment-rating-details{
-	margin: 0px 20px;
+	margin: 0px 18px;
 }
 #rating-result-container #rating-details table, .comment-rating-details table{
 	font-size: 18px;

@@ -440,6 +440,24 @@
 		if(!$isOtherDate) return "";
 		return $wyj;
 	}
+	
+	function getEventsFromGroup($id){
+		$conn = sqlConnect();
+		$events = array();
+		$query="SELECT * FROM `wydarzenia` WHERE `grupa` = $id ORDER BY `data`,`czas`";
+		$result=$conn->query($query);
+		while($row = $result->fetch_assoc()) {
+			$data = $row['data'];
+			$timeStart = substr($row['czas'], 0, 5);
+			$timeEnd = substr($row['czas_end'], 0, 5);
+			$events[$data][] = $timeStart;
+			$events[$data][] = $timeEnd;
+			$events[$data][] = $row['id'];
+		}		
+		sqlClose($conn);
+		return $events;
+	}
+	
 	function getMainEvent($conn, $cat = 0)
 	{
 		if($cat == 0 ){
@@ -1701,9 +1719,9 @@
 			$wyj .= '<div class="comment-rating-details"><table>';
 			$ratingsVals = getRatingValForComment($c['id']);
 			foreach( getRatingForParent( $place['id_kat'] , 1) as $rating){
-				$wyj .= '<tr><td>'.$rating['name'].': </td>';
 				for($i = 0; $i < count($ratingsVals); $i++){
 					if($ratingsVals[$i]['id_rating'] == $rating['id']){
+						$wyj .= '<tr><td>'.$rating['name'].': </td>';
 						$wyj .= '<td><span class="r-s-'.$ratingsVals[$i]['value'].'">
 							<img src="img/active_star.png" alt="1" class="a-s-1">
 							<img src="img/star.png" alt="1" class="n-s-1">
@@ -1716,9 +1734,9 @@
 							<img src="img/active_star.png" alt="1" class="a-s-5">
 							<img src="img/star.png" alt="1" class="n-s-5">
 						</td>';
+						$wyj .= '</tr>';
 					}
 				}
-				$wyj .= '</tr>';
 			}
 			$wyj .= '</table></div>';
 			if($admin) $wyj .= '<div class="editComment-panel"><form class="editComment">
@@ -2714,6 +2732,13 @@
 		$sql = "UPDATE `wydarzenia` SET `grupa`= $id_group WHERE `id` = $id_event";
 		$conn->query($sql);
 		sqlClose($conn);
+	}	
+	
+	function ungroupEventsInGroup($id_group){
+		$conn = sqlConnect();
+		$sql = "UPDATE `wydarzenia` SET `grupa`= -1 WHERE `grupa` = $id_group";
+		$conn->query($sql);
+		sqlClose($conn);
 	}
 	
 	function getOpenHoursForPlaceJSON($id){
@@ -2727,7 +2752,8 @@
 				}
 			}
 			if($hasOpenHours){
-				return getDescFieldVal($idFieldOpenHours, 0, $p['id'], 1)[0]['value'];
+				$hours = getDescFieldVal($idFieldOpenHours, 0, $p['id'], 1)[0]['value'];
+				return ($hours != "" && $hours != '["","","","","","","","","","","","","",""]') ? $hours : false;
 			}
 		}		
 		return false;

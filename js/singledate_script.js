@@ -149,8 +149,9 @@ function removeThisTime(obj){
 
 function upDateShowTimeDetails(){
 	if($("input[name='time-from-place']:checked").val() == 1){
-		$(".time-details-cont").hide();
+		setAutoHoursTimes();
 	}else{
+		$(".closed-info").remove();
 		$(".time-details-cont").show();
 	}
 }
@@ -173,13 +174,41 @@ function getOpenHours(){
 	   type: "GET",
 	   url: "user_ajax.php?action=getOpenHours&place="+placeId,
 	   success: function(data){
-		   if(data == ""){
+			if(data == ""){
 			   hasOpenHours = false;
 			   updateVisibleTypeHours();
-		   }else{
+			}else{
 				hasOpenHours = true;
 				updateVisibleTypeHours();
-		   }
+			}
+	   }
+	});
+}
+
+function setAutoHoursTimes(){
+	var placeId = $("#placeId").val();
+	$.ajax({
+	   type: "GET",
+	   url: "user_ajax.php?action=getOpenHours&place="+placeId,
+	   success: function(data){
+			if(data == ""){
+				$(".closed-info").remove();
+			}else{
+				var openHours = JSON.parse(data);
+				$(".day-time").each(function(){
+					var stringDate = $(this).find('.date-value-hide').val();
+					var date = new Date(Date.parse(stringDate));
+					var dayNumber = date.getDay() > 0 ? date.getDay() -1 : 6 ;
+					if(openHours[dayNumber*2] == ""){
+						$(this).children('p').append('<span class="closed-info"><br>Uwaga! W ten dzień miejsce jest nieczynne!</span>');
+					}else{
+						$(this).find('.time-details:not(:first)').remove();
+						var inputs = $(this).find('.time-details').eq(0).find('input');
+						$(inputs[0]).val(openHours[dayNumber*2]);
+						$(inputs[1]).val(openHours[dayNumber*2+1]);
+					}
+				});
+			}
 	   }
 	});
 }

@@ -1,5 +1,3 @@
-var dates = [];
-
 var weekNames = ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
 var mounthNames = ['styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec', 'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'];
 function addDate(date) {
@@ -23,6 +21,34 @@ function addDate(date) {
 		upDateShowTimeDetails();
 		updateVisibleTypeHours();
 	}
+}
+
+function addDatesToMultipleDates() {
+	$.each(multipleDates, function( index, value ) {
+		var date = index;
+		var stringDate = date;
+		var date = new Date(Date.parse(stringDate));
+		var dayNumber = date.getDate();
+		var weekDayName = weekNames[date.getDay()];
+		var mounthName = mounthNames[date.getMonth()];
+		var index = $(".day-time").length;
+		var html = '<div class="day-time">';
+		html += '<input type="hidden" class="date-value-hide" name="date['+index+']" value="'+stringDate+'">';
+		html += '<p>'+weekDayName+' <span>'+dayNumber+' '+mounthName+'</span></p>';
+		html += '<div class="time-details-cont">';
+		for(var i = 0; i < value.length; i=i+3){
+			var timeStart = value[i];
+			var timeEnd = value[i+1];
+			var id_event = value[i+2];
+			html += '<div class="time-details">';
+			html += '<p data-index="'+index+'">od <input type="text" name="time['+index+']['+i+']" value="'+timeStart+'"> do <input type="text" name="time['+index+']['+(i+1)+']" value="'+timeEnd+'"> <span><img src="img/add_time.png" alt="Następna godzina" class="add-next-time" onclick="addNextTime(this);"> <img src="img/remove_time.png" alt="Usuń godzinę" class="remove-this-time" onclick="removeThisTime(this);"></span><input type="hidden" class="not-valid" name="time[id]['+index+']['+i+']" value="'+id_event+'"></p>';
+			html += '</div>';
+		}
+		html += '</div></div>';
+		$(".time-conatiner").append(html);
+		upDateShowTimeDetails();
+		updateVisibleTypeHours();
+	});
 }
 
 function removeDate(index) {
@@ -126,8 +152,10 @@ function removeThisTime(obj){
 
 function upDateShowTimeDetails(){
 	if($("input[name='time-from-place']:checked").val() == 1){
-		$(".time-details-cont").hide();
+		//$(".closed-info").remove();
+		setAutoHoursTimes();
 	}else{
+		$(".closed-info").remove();
 		$(".time-details-cont").show();
 	}
 }
@@ -150,13 +178,41 @@ function getOpenHours(){
 	   type: "GET",
 	   url: "user_ajax.php?action=getOpenHours&place="+placeId,
 	   success: function(data){
-		   if(data == ""){
+			if(data == ""){
 			   hasOpenHours = false;
 			   updateVisibleTypeHours();
-		   }else{
+			}else{
 				hasOpenHours = true;
 				updateVisibleTypeHours();
-		   }
+			}
+	   }
+	});
+}
+
+function setAutoHoursTimes(){
+	var placeId = $("#placeId").val();
+	$.ajax({
+	   type: "GET",
+	   url: "user_ajax.php?action=getOpenHours&place="+placeId,
+	   success: function(data){
+			if(data == ""){
+				$(".closed-info").remove();
+			}else{
+				var openHours = JSON.parse(data);
+				$(".day-time").each(function(){
+					var stringDate = $(this).find('.date-value-hide').val();
+					var date = new Date(Date.parse(stringDate));
+					var dayNumber = date.getDay() > 0 ? date.getDay() -1 : 6 ;
+					if(openHours[dayNumber*2] == ""){
+						$(this).children('p').append('<span class="closed-info"><br>Uwaga! W ten dzień miejsce jest nieczynne!</span>');
+					}else{
+						$(this).find('.time-details:not(:first)').remove();
+						var inputs = $(this).find('.time-details').eq(0).find('input');
+						$(inputs[0]).val(openHours[dayNumber*2]);
+						$(inputs[1]).val(openHours[dayNumber*2+1]);
+					}
+				});
+			}
 	   }
 	});
 }

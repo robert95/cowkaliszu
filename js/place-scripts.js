@@ -75,6 +75,7 @@ function resizeImg(input){
 	if (input.files && input.files[0]) {
 		var img = document.createElement("img");
 		var reader = new FileReader();
+		changeImage = true;
 		reader.onload = function(e)
 		{
 			img.src = e.target.result;

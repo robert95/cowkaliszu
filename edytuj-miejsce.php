@@ -53,49 +53,56 @@
 		}
 		
 		//desc fileds static
-		foreach($_POST['descStaticField'] as $idDs => $dS){
-			$idDs = addslashes($idDs);
-			$dS = addslashes($dS);
-			$field = getDescFieldVal($idDs, 0, $id, 1);
-			$idF = (count($field) > 0) ? $field[0]['id'] : -1; 
-			if($idF > 0){
-				editDescFieldVal($idF, $dS);
-			}else{
-				addDescFieldVal($idDs, 0, $dS, $id, 1);
+		if(isset($_POST['descStaticField'])){
+			foreach($_POST['descStaticField'] as $idDs => $dS){
+				$idDs = addslashes($idDs);
+				$dS = addslashes($dS);
+				$field = getDescFieldVal($idDs, 0, $id, 1);
+				$idF = (count($field) > 0) ? $field[0]['id'] : -1; 
+				if($idF > 0){
+					editDescFieldVal($idF, $dS);
+				}else{
+					addDescFieldVal($idDs, 0, $dS, $id, 1);
+				}
 			}
 		}
+		
 		//desc filed non-static
-		foreach($_POST['descField'] as $idDs => $dS){
-			$idDs = addslashes($idDs);
-			$dS = addslashes($dS);
-			$field = getDescFieldVal($idDs, 1, $id, 1);
-			$idF = (count($field) > 0) ? $field[0]['id'] : -1; 
-			if($idF > 0){
-				editDescFieldVal($idF, $dS);
-			}else{
-				addDescFieldVal($idDs, 1, $dS, $id, 1);
+		if(isset($_POST['descField'])){
+			foreach($_POST['descField'] as $idDs => $dS){
+				$idDs = addslashes($idDs);
+				$dS = addslashes($dS);
+				$field = getDescFieldVal($idDs, 1, $id, 1);
+				$idF = (count($field) > 0) ? $field[0]['id'] : -1; 
+				if($idF > 0){
+					editDescFieldVal($idF, $dS);
+				}else{
+					addDescFieldVal($idDs, 1, $dS, $id, 1);
+				}
 			}
 		}
 		//filters
-		foreach($_POST['filter'] as $idF => $f){
-			$idF = addslashes($idF);
-			$filterType = getFilter($idF)['type'];
-			if($filterType == 1){
-				deleteAllFieldValForFilterWithThis($f[0], $id, 1);
-				foreach($f as $fs){
-					$fs = addslashes($fs);
-					addFilterFieldVal($fs, 1, $id, 1);
-				}
-			}else{
-				$f = addslashes($f);
-				$field = getFilterFieldVal($f, $id, 1);
-				$idFf = (count($field) > 0) ? $field[0]['id'] : -1; 
-				if($idFf > 0){
-					editFilterFieldVal($idFf, 1);
+		if(isset($_POST['filter'])){
+			foreach($_POST['filter'] as $idF => $f){
+				$idF = addslashes($idF);
+				$filterType = getFilter($idF)['type'];
+				if($filterType == 1){
+					deleteAllFieldValForFilterWithThis($f[0], $id, 1);
+					foreach($f as $fs){
+						$fs = addslashes($fs);
+						addFilterFieldVal($fs, 1, $id, 1);
+					}
 				}else{
-					addFilterFieldVal($f, 1, $id, 1);
+					$f = addslashes($f);
+					$field = getFilterFieldVal($f, $id, 1);
+					$idFf = (count($field) > 0) ? $field[0]['id'] : -1; 
+					if($idFf > 0){
+						editFilterFieldVal($idFf, 1);
+					}else{
+						addFilterFieldVal($f, 1, $id, 1);
+					}
+					deleteAllFieldValForFilterWithoutThis($f, $id, 1);
 				}
-				deleteAllFieldValForFilterWithoutThis($f, $id, 1);
 			}
 		}
 		$linkToEvent = getLinkToPlaceById($id);
@@ -109,6 +116,7 @@
 		$id = -1;
 		$id_kat = -1;
 		$image = "";
+		$imageBase64 = "";
 		$thumb = "";
 		$name = "";
 		$adress = "";
@@ -119,6 +127,7 @@
 		$id = $_GET['id'];
 		$place = getPlace($id);
 		$image = $place['img'];
+		$imageBase64 = "";
 		if($image != ''){
 			$type = pathinfo($image, PATHINFO_EXTENSION);
 			$data = file_get_contents($image);
@@ -167,7 +176,7 @@
 					</div>
 					<input type="hidden" name="X" id="X" value="0"/>
 					<input type="hidden" name="Y" id="Y" value="0"/>
-					<input type="hidden" name="W" id="W" value="100"/>
+					<input type="hidden" name="W" id="W" value="1000"/>
 					<input type="hidden" name="changeThumb" id="changeThumb" value="0"/>
 					<input type="hidden" name="imgWidth" id="imgWidth" value="0"/>
 					<input type="hidden" name="old_image" id="old_image" value="<?php echo $image; ?>"/>
@@ -186,6 +195,7 @@
 						<div class="mainevent_desc">
 						    <div class="mainevent-title-box eventpage_desc">
 								<div id="id_kat_wrapper">
+									<span class="select-cat-label">Wybierz kategorię</span>
 									<select name="id_kat" id="id_kat">
 										<?php
 											foreach(getPlaceCats() as $c){
@@ -195,6 +205,16 @@
 										?>
 									</select>
 								</div>
+							</div>
+							<div class="categories-chooser filter-container">
+								<ul>
+								<?php
+									foreach(getPlaceCats() as $c){
+										$selected = $c['id'] == $id_kat ? 'activ-option' : '';
+										echo '<li class="'.$selected.'" data-id="'.$c['id'].'">'.$c['name'].'</li>';
+									}
+								?>
+								</ul>
 							</div>
 							<div class="mainevent-info-box">
 								<input type="hidden" name="ax" id="ax" value="<?php echo $x; ?>"/>
@@ -261,6 +281,9 @@
 		<div class="loading-panel full-loading-panel">
 			<img src="img/loading.gif" alt="Ładowanie">
 		</div>
+		<script>
+			var changeImage = false;
+		</script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 		<script src="https://maps.google.com/maps/api/js?key=AIzaSyDa4nN-bDVonpOyK5S7HAx23krp3ZBRLhE&sensor=false" type="text/javascript"></script>
 		<script type="text/javascript" src="js/skrypt_widget.js"></script>
@@ -268,5 +291,6 @@
 		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 		<script type="text/javascript" src="js/place-scripts.js"></script>
 		<script type="text/javascript" src="js/edit-place-scripts.js"></script>
+		<script type="text/javascript" src="js/cat-chooser.js"></script>
 	</body>
 </html>	

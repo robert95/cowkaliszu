@@ -2,6 +2,7 @@
 	include_once 'mysql.php';
 	include_once 'function.php';
 	cleanEventSession();
+	
 	$conn = sqlConnect();
 	if(isset($_COOKIE['stmh']))
 	{//zalogowany
@@ -100,13 +101,17 @@
 								}
 								if($hasOpenHours){
 									$openHours = getDescFieldVal($idFieldOpenHours, 0, $p['id'], 1);
-									$openHours = json_decode($openHours[0]['value']);
-									$nowWeekDay = date('w');
-									$nowWeekDay = $nowWeekDay != 0 ? $nowWeekDay-1 : $nowWeekDay = 6;
-									$nowHour = date('H:i');
-									if($openHours[$nowWeekDay*2] == "" || !($openHours[$nowWeekDay*2] <= $nowHour && $nowHour <= $openHours[$nowWeekDay*2+1])){
-										$isOpen = "Nieczynne";
-										$isOpenClass= "closed-place";
+									if(!$openHours){
+										$hasOpenHours = false;
+									}else{
+										$openHours = json_decode($openHours[0]['value']);
+										$nowWeekDay = date('w');
+										$nowWeekDay = $nowWeekDay != 0 ? $nowWeekDay-1 : $nowWeekDay = 6;
+										$nowHour = date('H:i');
+										if($openHours[$nowWeekDay*2] == "" || !($openHours[$nowWeekDay*2] <= $nowHour && $nowHour <= $openHours[$nowWeekDay*2+1])){
+											$isOpen = "Nieczynne";
+											$isOpenClass= "closed-place";
+										}
 									}
 								}
 								

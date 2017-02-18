@@ -2,7 +2,6 @@
 	include_once 'mysql.php';
 	include_once 'function.php';
 	$conn = sqlConnect();
-	
 	//$catLi = categoriesAsLi($conn);
 	$catDiv = categoriesAsDivList($conn);
 	$popularEvent = getPopularEvent($conn);

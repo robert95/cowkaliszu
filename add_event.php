@@ -40,7 +40,7 @@
 			$id_place = addslashes($_POST['placeId']);
 			$hoursFromPlace = addslashes($_POST['time-from-place']) == 1;
 			
-			if($_FILES['img']){
+			if(isset($_FILES['img']) && $_FILES['img']["tmp_name"] != ""){
 				$img = savePhotoFromBlob($name, $_FILES['img']);
 				$thumb = saveThumbPhoto($name, $img, addslashes($_POST['imgWidth']));
 			}else{
@@ -56,23 +56,13 @@
 			
 			if($id == -1 ){
 				$eventsIds = array();
-				$i = 0;
-				foreach($_POST['date'] as $date){
+				foreach($_POST['date'] as $i => $date){
 					$data = addslashes($date);
 					for($j = 0; $j < count($_POST['time'][$i]); $j+=2){
-						if($hoursFromPlace){
-							$time = getTimeStartForPlaceForData($id_place, $data);
-							$time_end = getTimeEndForPlaceForData($id_place, $data);
-							if($time && $time_end){
-								$eventsIds[] = addEvent($name, $id_kat, $img, $thumb, $data, $time, $time_end, $desc, $id_place, $idU, $www, $yt, $price);
-							}
-						}else{
-							$time = addslashes($_POST['time'][$i][$j]);
-							$time_end = addslashes($_POST['time'][$i][$j+1]);
-							$eventsIds[] = addEvent($name, $id_kat, $img, $thumb, $data, $time, $time_end, $desc, $id_place, $idU, $www, $yt, $price);
-						}
-					}			
-					$i++;
+						$time = addslashes($_POST['time'][$i][$j]);
+						$time_end = addslashes($_POST['time'][$i][$j+1]);
+						$eventsIds[] = addEvent($name, $id_kat, $img, $thumb, $data, $time, $time_end, $desc, $id_place, $idU, $www, $yt, $price);
+					}
 				}
 				if(count($eventsIds) > 1){
 					$i = 0;
@@ -88,13 +78,42 @@
 				//dodano poprawnie wydarzenia
 				$addComplete = true;
 			}else{
-				$id = intval($_POST['id']);
-				$data = $_POST['date'][0];
-				$time = $_POST['time'][0][0];
-				$data_end = $data;
-				$time_end = $_POST['time'][0][1];
-				
-				$eventsIds[0] = newEditEvent($id, $name, $id_kat, $thumb, $img, $data, $time, $data_end, $time_end, $desc, $id_place, $www, $yt, $price);
+				//edycja wydarzenia
+				if(!(isset($_GET['single']))){
+					//grupa
+					$id_group = getEvent($conn, $id)['grupa'];
+					ungroupEventsInGroup($id_group);
+					foreach($_POST['date'] as $i => $date){
+						$data = htmlspecialchars(addslashes($date));
+						for($j = 0; $j < count($_POST['time'][$i]); $j+=2){
+							$time = htmlspecialchars(addslashes($_POST['time'][$i][$j]));
+							$time_end = htmlspecialchars(addslashes($_POST['time'][$i][$j+1]));
+							if(isset($_POST['time']['id'][$i][$j])){
+								$id = $_POST['time']['id'][$i][$j];
+								$eventsIds[] = newEditEvent($id, $name, $id_kat, $thumb, $img, $data, $time, $data, $time_end, $desc, $id_place, $www, $yt, $price);
+							}else{
+								$eventsIds[] = addEvent($name, $id_kat, $img, $thumb, $data, $time, $time_end, $desc, $id_place, $idU, $www, $yt, $price);
+							}
+						}
+					}				
+					if(count($eventsIds) > 1){
+						$i = 0;
+						$id_group = -1;
+						foreach($eventsIds as $id_event){
+							if($i == 0){
+								$id_group = $id_event;
+							}
+							updateGroupId($id_group, $id_event);
+							$i++;
+						}
+					}
+				}else{
+					//pojedynczy
+					$data = htmlspecialchars(addslashes($_POST['date'][0]));	
+					$time = htmlspecialchars(addslashes($_POST['time'][0][0]));	
+					$time_end = htmlspecialchars(addslashes($_POST['time'][0][1]));	
+					$eventsIds[0] = newEditEvent($id, $name, $id_kat, $thumb, $img, $data, $time, $data, $time_end, $desc, $id_place, $www, $yt, $price);
+				}
 				$editComplete = true;
 			}
 			$linkToEvent = linkToEvent($eventsIds[0]);
@@ -129,8 +148,14 @@
 			$free = $price == 0;
 			$place = getPlace($event['id_miejsce']);
 			$x = $place['x'];
-			$y = $place['y'];
-			$event_group = false;
+			$y = $place['y'];	
+			$eventsInGroup = array();		
+			if($event['grupa'] > 0 && !(isset($_GET['single']))){
+				$eventsInGroup = getEventsFromGroup($event['grupa']);
+				$event_group = true;
+			}else{
+				$event_group = false;
+			}
 		}	
 	}else{
 		if(!(isset($_GET['id']))){
@@ -148,6 +173,7 @@
 			$x = $place['x'];
 			$y = $place['y'];
 			$imageBase64 = '';
+			$eventsInGroup = array();
 		}else{
 			$id = intval($_GET['id']);
 			$event = getEvent($conn, $id);
@@ -168,7 +194,13 @@
 			$place = getPlace($event['id_miejsce']);
 			$x = $place['x'];
 			$y = $place['y'];
-			$event_group = false;
+			$eventsInGroup = array();
+			if($event['grupa'] > 0 && !(isset($_GET['single']))){
+				$eventsInGroup = getEventsFromGroup($event['grupa']);
+				$event_group = true;
+			}else{
+				$event_group = false;
+			}
 		}	
 	}	
 	
@@ -273,6 +305,7 @@
 						<div class="mainevent_desc">
 						    <div class="mainevent-title-box eventpage_desc">
 								<div id="id_kat_wrapper">
+									<span class="select-cat-label">Wybierz kategorię</span>
 									<select name="id_kat" id="id_kat">
 										<?php
 											foreach(getEventCats() as $c){
@@ -282,6 +315,16 @@
 										?>
 									</select>
 								</div>
+							</div>
+							<div class="categories-chooser filter-container">
+								<ul>
+								<?php
+									foreach(getEventCats() as $c){
+										$selected = $c['id'] == $id_kat ? 'activ-option' : '';
+										echo '<li class="'.$selected.'" data-id="'.$c['id'].'">'.$c['nazwa'].'</li>';
+									}
+								?>
+								</ul>
 							</div>
 							<div class="mainevent-info-box">
 								<input type="hidden" name="ax" id="ax" value="<?php echo $x; ?>"/>
@@ -384,9 +427,23 @@
 		<script type="text/javascript" src="js/list.min.js"></script>
 		<script type="text/javascript" src="js/fizzy.js"></script>
 		<script type="text/javascript" src="js/place-scripts.js"></script>
+		<script type="text/javascript" src="js/cat-chooser.js"></script>
 		<?php 
-			if($event_group) 
+			if($event_group){
+				echo '<script>';
+				if(count($eventsInGroup) > 0){
+					echo 'var dates = '.json_encode(array_keys($eventsInGroup)).';';
+					echo 'var multipleDates = '.json_encode($eventsInGroup).';';
+				}else{
+					echo 'var dates = [];';
+					echo 'var multipleDates = [];';
+				}
+				echo '</script>';
 				echo '<script type="text/javascript" src="js/multidate_script.js"></script>';
+				if(isset($eventsInGroup)){
+					echo '<script>addDatesToMultipleDates();</script>';
+				}
+			}				
 			else{
 				echo '<script>
 					var dates = [\''.$event['data'].'\'];
@@ -398,6 +455,7 @@
 			}
 		?>
 		<script>
+			var changeImage = false;
 			var mapa;
 			var marker;
 			var jest = false;
@@ -486,11 +544,14 @@
 				var patt = new RegExp("^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$");
 				if($("input[name='time-from-place']:checked").val() == 2){
 					$(".time-details input").each(function(){
-						if(!patt.test($(this).val())){
-							$(this).addClass("error-input");
-							isCorrectForm = false;
-						}else{
-							$(this).removeClass("error-input");
+						if(!($(this).hasClass('not-valid'))){
+							if(!patt.test($(this).val())){
+								$(this).addClass("error-input");
+								console.log("tutaj");
+								isCorrectForm = false;
+							}else{
+								$(this).removeClass("error-input");
+							}
 						}
 					});
 				}
@@ -535,11 +596,12 @@
 				validateHoursFiled();
 				setTimeout(function(){
 					if(isCorrectForm){
-						var base64ImageContent = $("#img").val().replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
-						var blob = base64ToBlob(base64ImageContent, 'image/png');  
-						
 						var formData = new FormData(document.forms[0]);
-						formData.append('img', blob);
+						if(changeImage){
+							var base64ImageContent = $("#img").val().replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
+							var blob = base64ToBlob(base64ImageContent, 'image/png');  
+							formData.append('img', blob);
+						}
 						var url = "add_event.php"; 
 						$(".full-loading-panel").show();
 						$.ajax({
@@ -605,7 +667,6 @@
 				if($("#search-cont .name").length == 0){
 					updateLetterCont();
 				}
-				resetCheckedLetter();
 			}
 			
 			function updateLetterCont(){

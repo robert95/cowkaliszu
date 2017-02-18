@@ -16,23 +16,27 @@ function add_comment(){
 }
 
 function add_ratings_vals(){
-	$(".rating-stars").each(function(index){
-		var idR = $(this).attr('data-id');
-		var val = $(this).attr('data-val');
-		console.log(index + ": " + idR + " - " + val);
-		add_rating_val(idR, val);
-		if(index+1 == $(".rating-stars").length){
-			for(var i = 0; i < 6; i++){
-				if(3 == i){
-					$(".rating-stars").addClass('r-s-' + 3);
-					$(".rating-stars").attr('data-val', 3);
-				}else{
-					$(".rating-stars").removeClass('r-s-'+i);
+	if($("#commentWithRating").val() == 1){
+		$("#commentWithRating").val(0);
+		$(".rating-stars").each(function(index){
+			var idR = $(this).attr('data-id');
+			var val = $(this).attr('data-val');
+			add_rating_val(idR, val);
+			if(index+1 == $(".rating-stars").length){
+				for(var i = 0; i < 6; i++){
+					if(3 == i){
+						$(".rating-stars").addClass('r-s-' + 3);
+						$(".rating-stars").attr('data-val', 3);
+					}else{
+						$(".rating-stars").removeClass('r-s-'+i);
+					}
 				}
+				refresh_comment($("#id_item").val());
 			}
-			refresh_comment($("#id_item").val());
-		}
-	});
+		});
+	}else{
+		refresh_comment($("#id_item").val());
+	}
 }
 
 function add_rating_val(idR, val){
@@ -76,21 +80,24 @@ function delete_comment(){
 }
 
 function refresh_comment(id){
-	$.ajax({
-	   type: "GET",
-	   url: "getComments.php?type=2&id="+id,
-	   success: function(data)
-	   {
-			$(".comments-list").html(data);
-			showMoreComments(0);
-			$('.loading-panel').hide();
-	   }
-	});
+	setTimeout(function(){
+		$.ajax({
+		   type: "GET",
+		   url: "getComments.php?type=2&id="+id,
+		   success: function(data)
+		   {
+				$(".comments-list").html(data);
+				showMoreComments(0);
+				$('.loading-panel').hide();
+		   }
+		});
+	}, 250);
 }
 
 $(document).ready(function(){
 	showMoreComments();
 	$(".rating-stars img").click(function(){
+		$("#commentWithRating").val(1);
 		var val = $(this).attr('data-val');
 		for(var i = 0; i < 6; i++){
 			if(val == i){

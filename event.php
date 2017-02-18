@@ -1,6 +1,7 @@
 <?php
 	include_once 'mysql.php';
 	include_once 'function.php';
+	
 	cleanEventSession();
 	$conn = sqlConnect();
 	if(!(isset($_GET['id']))){

@@ -66,7 +66,6 @@ function runFilter(){
 		filtersIds = filters[i+1];
 		$('.event').each(function(){
 			var fIds = $(this).data('filters') + '';
-			console.log(fIds);
 			fIds = fIds.split('-');
 			var notInFilter = true;
 			for(var i = 0; i < filtersIds.length; i++){
@@ -104,7 +103,7 @@ function updateActiveCats(){
 	$( ".cat-list").each(function(){
 		filters.push($(this).data('slug'));
 	});
-	for (i=0; i < arr.length; i+=2){
+	for (i=0; i < arr.length; i++){
 		k = arr[i];
 		v = arr[i+1];
 		if(filters.indexOf(k) > -1){

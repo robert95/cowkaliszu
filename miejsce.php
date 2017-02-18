@@ -220,6 +220,7 @@
 								<input type="hidden" name="id_item" id="id_item" value="<?php echo $id; ?>">
 							</form>
 							<div class="rating-panel add-my-rate" >
+								<input type="hidden" value="0" id="commentWithRating">
 								<p>Dodaj ocenę:</p>
 								<table>
 								<?php 
